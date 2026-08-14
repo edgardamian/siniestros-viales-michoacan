@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accidentes Viales · Michoacán 2016–2026</title>
+
+  <!-- Hojas de estilo externas (Leaflet, MarkerCluster, MapLibre GL, fuentes y diseño custom) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="css/style.css?v=4.5">
+</head>
+
+<body>
+
+  <!-- PANTALLA DE CARGA (SPINNER) -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loading-text">Cargando 58,500 accidentes...</p>
+  </div>
+
+  <div class="app">
+
+    <!-- CABECERA PRINCIPAL: Título, Crédito, Botones de Acción e Indicadores (KPIs) -->
+    <header class="top">
+      <div class="top-row">
+        <div>
+          <p class="eyebrow">COEPRA Michoacán · Seguridad Vial Michoacán · IMPLAN Morelia</p>
+          <h1>Accidentes viales<small>Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con georreferencia · Elaborado por Edgar Mora D.</small></h1>
+        </div>
+        <div class="top-actions">
+          <button class="btn filters-toggle" id="btn-toggle-filters">☰ Filtros</button>
+          <button class="btn" id="btn-export" style="display:none;">⬇ CSV filtrado</button>
+          <button class="btn" id="btn-export-img">Capturar imagen</button>
+          <button class="btn primary" id="btn-reset">↺ Reiniciar filtros</button>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Indicadores Clave (KPIs) -->
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-label">Accidentes</div>
+          <div class="kpi-value" id="kpi-total">–</div>
+        </div>
+        <div class="kpi fatal">
+          <div class="kpi-label">Fallecidos</div>
+          <div class="kpi-value" id="kpi-fallecidos">–</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Lesionados</div>
+          <div class="kpi-value" id="kpi-lesionados">–</div>
+        </div>
+        <div class="kpi ok">
+          <div class="kpi-label">Promedio mensual</div>
+          <div class="kpi-value" id="kpi-promedio">–</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Municipios afectados</div>
+          <div class="kpi-value" id="kpi-municipios">–</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ÁREA DE CONTENIDO EN 3 COLUMNAS -->
+    <main class="layout">
+
+      <!-- COLUMNA IZQUIERDA: Panel Lateral de Filtros -->
+      <aside class="panel sidebar" id="sidebar">
+        <div class="filter-block">
+          <div class="filter-title">Severidad</div>
+          <div class="chips" id="severity-chips"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Tipo de vehículo <span class="mini-link" id="vehi-all">todos</span> / <span class="mini-link" id="vehi-none">ninguno</span></div>
+          <div class="checklist" id="vehi-checklist"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Municipio <span class="mini-link" id="muni-all">todos</span> / <span class="mini-link" id="muni-none">ninguno</span></div>
+          <input class="search-input" id="muni-search" placeholder="Buscar municipio…">
+          <div class="checklist" id="muni-checklist"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Tipo de incidente <span class="mini-link" id="tipo-all">todos</span> / <span class="mini-link" id="tipo-none">ninguno</span></div>
+          <div class="checklist" id="tipo-checklist"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Condición climática</div>
+          <div class="chips" id="clima-chips"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Condición de la vía</div>
+          <div class="chips" id="via-chips"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Superficie</div>
+          <div class="chips" id="superf-chips"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Sexo del presunto responsable</div>
+          <div class="chips" id="sexo-chips"></div>
+        </div>
+      </aside>
+
+      <!-- COLUMNA CENTRAL: Mapa Interactivo, Distribución Temporal y Tendencia -->
+      <div class="map-col">
+
+        <!-- Mapa de Leaflet con Barra de Herramientas de Dibujo -->
+        <div class="panel map-panel">
+          <div class="map-toolbar">
+            <div class="left-tools">
+              <button class="tool-btn" id="tool-rect" title="Selección rectangular">▭</button>
+              <button class="tool-btn" id="tool-circle" title="Selección radial">◎</button>
+              <button class="tool-btn" id="tool-poly" title="Selección poligonal">⬡</button>
+              <button class="tool-btn" id="tool-clear" title="Limpiar selección de mapa">✕</button>
+              <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación de edificios)">3D</button>
+            </div>
+            <div class="right-tools">
+              <label style="font-size:11px;color:var(--niebla);font-weight:600;">Mapa</label>
+              <select class="color-select" id="basemap-mode">
+                <option value="light">Claro</option>
+                <option value="bw">Blanco y Negro</option>
+                <option value="satellite">Satélite</option>
+                <option value="dark">Oscuro</option>
+              </select>
+              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:8px;">Vista</label>
+              <select class="color-select" id="layer-mode">
+                <option value="heat" selected>Calor</option>
+                <option value="cluster">Puntos</option>
+              </select>
+              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:8px;">Color</label>
+              <select class="color-select" id="color-mode">
+                <option value="sev">Severidad</option>
+                <option value="vehiculo">Tipo de vehículo</option>
+                <option value="clima">Condición climática</option>
+              </select>
+            </div>
+          </div>
+          <div id="map"></div>
+          <div class="selection-badge" id="selection-badge">
+            <span id="selection-text">Filtro espacial activo</span>
+            <button id="selection-clear-x">✕</button>
+          </div>
+          <div class="map-legend" id="map-legend"></div>
+        </div>
+
+        <!-- Panel Doble: Accidentes por Hora y Día de la Semana -->
+        <div class="panel clock-panel">
+          <!-- Accidentes por Hora -->
+          <div class="time-chart-box">
+            <div class="time-chart-header">
+              <h2>Accidentes por hora <span class="tag" id="hour-range-tag">00 – 23 h</span></h2>
+              <span class="clock-note" id="peak-hour-note"></span>
+            </div>
+            <div class="chart-box" style="height:120px;"><canvas id="chart-hours"></canvas></div>
+            <div class="chart-slider-box" style="padding:0 4px; margin-top:2px;">
+              <div class="range-wrap" id="hour-slider">
+                <div class="range-track"></div>
+                <div class="range-fill" id="hour-fill"></div>
+                <input type="range" id="hour-min" min="0" max="23" value="0" step="1">
+                <input type="range" id="hour-max" min="0" max="23" value="23" step="1">
+              </div>
+              <div class="range-labels" style="margin-top:-6px; font-size:10px;">
+                <span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>23h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Día de la Semana -->
+          <div class="time-chart-box">
+            <div class="time-chart-header">
+              <h2>Día de la semana <span class="tag" id="weekday-range-tag">Dom – Sáb</span></h2>
+              <span class="clock-note" id="weekday-note">Clic en barras para seleccionar</span>
+            </div>
+            <div class="chart-box" style="height:120px;"><canvas id="chart-weekdays"></canvas></div>
+            <div class="chart-presets-box" id="weekday-buttons-box" style="margin-top:6px; display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
+              <span class="chip small active" data-wd="all" style="font-size:10px; padding:3px 6px;">Todos</span>
+              <span class="chip small active" data-wd="1" style="font-size:10px; padding:3px 6px;">Lun</span>
+              <span class="chip small active" data-wd="2" style="font-size:10px; padding:3px 6px;">Mar</span>
+              <span class="chip small active" data-wd="3" style="font-size:10px; padding:3px 6px;">Mié</span>
+              <span class="chip small active" data-wd="4" style="font-size:10px; padding:3px 6px;">Jue</span>
+              <span class="chip small active" data-wd="5" style="font-size:10px; padding:3px 6px;">Vie</span>
+              <span class="chip small active" data-wd="6" style="font-size:10px; padding:3px 6px;">Sáb</span>
+              <span class="chip small active" data-wd="0" style="font-size:10px; padding:3px 6px;">Dom</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Tendencia Mensual (Líneas 2016–2026) -->
+        <div class="panel trend-panel">
+          <div class="time-chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <h2>Tendencia mensual <span class="tag" id="trend-range-tag">2016–2026</span></h2>
+            <span class="clock-note" style="font-size:11px;" id="trend-note">Periodo: <b id="year-label" style="color:var(--ambar);">2016 – 2026</b><span id="trend-reset-box"></span></span>
+          </div>
+          <div class="chart-box tall"><canvas id="chart-trend"></canvas></div>
+          <div class="chart-slider-box" style="padding:0 6px; margin-top:4px;">
+            <div class="range-wrap" id="year-slider">
+              <div class="range-track"></div>
+              <div class="range-fill" id="year-fill"></div>
+              <input type="range" id="year-min" min="2016" max="2026" value="2016" step="1">
+              <input type="range" id="year-max" min="2016" max="2026" value="2026" step="1">
+            </div>
+            <div class="range-labels" style="margin-top:-6px; font-size:10px;">
+              <span>2016</span><span>2017</span><span>2018</span><span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA: Gráficos complementarios y Top Colonias -->
+      <div class="panel charts-col">
+        <div>
+          <h2>Tipo de vehículo</h2>
+          <div class="chart-box tall"><canvas id="chart-vehiculos"></canvas></div>
+        </div>
+        <div>
+          <h2>Severidad</h2>
+          <div class="chart-box"><canvas id="chart-severidad"></canvas></div>
+        </div>
+        <div>
+          <h2>Top tipos de incidente</h2>
+          <div class="chart-box tall"><canvas id="chart-tipos"></canvas></div>
+        </div>
+        <div>
+          <h2>Top colonias</h2>
+          <div class="top-list scrollable-list" id="top-colonias"></div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+      <span>Fuente: Seguridad Vial de Michoacán, base de accidentes viales georreferenciados 2016–2026.</span>
+      <span>IMPLAN MORELIA</span>
+    </footer>
+
+  </div>
+
+  <!-- LIBRERÍAS DE JS EXTERNAS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
+  <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- MÓDULOS DEL TABLERO -->
+  <script src="js/data.js?v=4.7"></script>
+  <script src="js/map.js?v=4.7"></script>
+  <script src="js/charts.js?v=4.7"></script>
+  <script src="js/filters.js?v=4.7"></script>
+  <script src="js/app.js?v=4.7"></script>
+
+</body>
+
+</html>
