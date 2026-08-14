@@ -19,10 +19,10 @@ const ChartsModule = {
      * Configuración global de fuentes y colores para Chart.js
      */
     init() {
-        Chart.defaults.color = '#8b94a3';
+        Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = "'Inter',sans-serif";
         Chart.defaults.font.size = 11;
-        Chart.defaults.borderColor = '#2a323c';
+        Chart.defaults.borderColor = '#2a374c';
     },
 
     /**
@@ -63,7 +63,7 @@ const ChartsModule = {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: '#4caf7d',
+                    backgroundColor: '#00e676',
                     borderRadius: 3
                 }]
             },
@@ -72,7 +72,7 @@ const ChartsModule = {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: '#232a33' }, beginAtZero: true },
+                    x: { grid: { color: '#1b2331' }, beginAtZero: true },
                     y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
@@ -98,7 +98,7 @@ const ChartsModule = {
         if (resetBox) {
             if (isYearFiltered) {
                 const numYears = (yMax - yMin + 1);
-                resetBox.innerHTML = ` <span style="color:var(--niebla-2);">(${numYears}/11 sel.)</span> <a href="#" id="reset-trend-btn" style="color:var(--ambar);margin-left:4px;text-decoration:underline;">↺ Todos</a>`;
+                resetBox.innerHTML = ` <span style="color:var(--niebla-2);">(${numYears}/11 sel.)</span> <a href="#" id="reset-trend-btn" style="color:var(--cono-naranja);margin-left:4px;text-decoration:underline;">↺ Todos</a>`;
                 const btn = document.getElementById('reset-trend-btn');
                 if (btn) {
                     btn.addEventListener('click', (ev) => {
@@ -136,8 +136,8 @@ const ChartsModule = {
                     {
                         label: 'Accidentes Totales',
                         data: chartData.totals,
-                        borderColor: '#f5a623',
-                        backgroundColor: 'rgba(245,166,35,.12)',
+                        borderColor: '#ffd600',
+                        backgroundColor: 'rgba(255,214,0,.14)',
                         fill: true,
                         tension: 0.25,
                         pointRadius: 0,
@@ -146,7 +146,7 @@ const ChartsModule = {
                     {
                         label: 'Defunciones',
                         data: chartData.fatals,
-                        borderColor: '#e1483d',
+                        borderColor: '#ff1744',
                         backgroundColor: 'transparent',
                         fill: false,
                         tension: 0.25,
@@ -168,9 +168,9 @@ const ChartsModule = {
                         display: true,
                         position: 'left',
                         beginAtZero: true,
-                        grid: { color: '#232a33' },
-                        title: { display: true, text: 'Accidentes Totales', color: '#f5a623', font: { size: 10, weight: '500' } },
-                        ticks: { color: '#8b94a3' }
+                        grid: { color: '#1b2331' },
+                        title: { display: true, text: 'Accidentes Totales', color: '#ffd600', font: { size: 10, weight: '500' } },
+                        ticks: { color: '#94a3b8' }
                     },
                     y2: {
                         type: 'linear',
@@ -178,8 +178,8 @@ const ChartsModule = {
                         position: 'right',
                         beginAtZero: true,
                         grid: { display: false },
-                        title: { display: true, text: 'Defunciones', color: '#e1483d', font: { size: 10, weight: '500' } },
-                        ticks: { color: '#e1483d' }
+                        title: { display: true, text: 'Defunciones', color: '#ff1744', font: { size: 10, weight: '500' } },
+                        ticks: { color: '#ff1744' }
                     }
                 }
             }
@@ -212,8 +212,8 @@ const ChartsModule = {
                 labels: ['Solo daños', 'Con heridos', 'Fatal'],
                 datasets: [{
                     data: [soloDanos, conLes, fatal],
-                    backgroundColor: ['#4caf7d', '#f5a623', '#e1483d'],
-                    borderColor: '#1c2229',
+                    backgroundColor: ['#00e676', '#ffd600', '#ff1744'],
+                    borderColor: '#131923',
                     borderWidth: 2
                 }]
             },
@@ -247,7 +247,7 @@ const ChartsModule = {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: '#f5a623',
+                    backgroundColor: '#ff6a00',
                     borderRadius: 3
                 }]
             },
@@ -256,7 +256,7 @@ const ChartsModule = {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: '#232a33' }, beginAtZero: true },
+                    x: { grid: { color: '#1b2331' }, beginAtZero: true },
                     y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
@@ -308,12 +308,12 @@ const ChartsModule = {
         // Resaltar barras según hora pico o rango seleccionado por el usuario
         const bgColors = counts.map((c, i) => {
             if (isHourFiltered) {
-                if (i >= hMin && i <= hMax) return '#e1483d';
-                return 'rgba(139, 148, 163, 0.22)';
+                if (i >= hMin && i <= hMax) return '#ff1744';
+                return 'rgba(148, 163, 184, 0.22)';
             }
-            if (i === peakHour) return '#e1483d';
-            if (c >= maxC * 0.75) return '#f5a623';
-            return '#3fa0e0';
+            if (i === peakHour) return '#ff1744';
+            if (c >= maxC * 0.75) return '#ffd600';
+            return '#00b0ff';
         });
 
         if (this.hoursChartInst) {
@@ -367,7 +367,7 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
-                        y: { grid: { color: '#232a33' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
+                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
                     }
                 }
             });
@@ -378,7 +378,7 @@ const ChartsModule = {
         if (noteEl) {
             if (isHourFiltered) {
                 const count = (hMax - hMin + 1);
-                noteEl.innerHTML = `${count}/24 sel. <a href="#" id="reset-hour-btn" style="color:var(--ambar);margin-left:4px;text-decoration:underline;">↺ Todos</a>`;
+                noteEl.innerHTML = `${count}/24 sel. <a href="#" id="reset-hour-btn" style="color:var(--cono-naranja);margin-left:4px;text-decoration:underline;">↺ Todos</a>`;
                 const btn = document.getElementById('reset-hour-btn');
                 if (btn) {
                     btn.addEventListener('click', (ev) => {
@@ -412,8 +412,8 @@ const ChartsModule = {
         const isFiltered = activeDays.size < 7;
 
         const bgColors = order.map(wd => {
-            if (isFiltered && !activeDays.has(wd)) return 'rgba(139, 148, 163, 0.22)';
-            return '#f5a623';
+            if (isFiltered && !activeDays.has(wd)) return 'rgba(148, 163, 184, 0.22)';
+            return '#ff6a00';
         });
 
         if (this.weekdaysChartInst) {
@@ -466,7 +466,7 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { grid: { color: '#232a33' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
+                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
                     }
                 }
             });

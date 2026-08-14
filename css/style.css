@@ -7,21 +7,30 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-/* ---------- VARIABLES DE DISEÑO (TEMA OSCURO PREMIUM) ---------- */
+/* ---------- VARIABLES DE DISEÑO (TEMA AUTOPISTA & SEÑALIZACIÓN VIAL OSCURO) ---------- */
 :root {
-  --asfalto: #14171c;        /* Fondo principal */
-  --concreto: #1c2229;       /* Fondo de paneles */
-  --panel-2: #232a33;        /* Fondo secundario de botones y entradas */
-  --linea: #323b46;          /* Bordes de división */
-  --ambar: #f5a623;          /* Color principal de acento */
-  --ambar-2: #ffc766;        /* Acento brillante */
-  --carmesi: #e1483d;        /* Color para alertas y fatalidades */
-  --verde: #4caf7d;          /* Color para solo daños y estado OK */
-  --hueso: #edeff3;          /* Texto principal */
-  --niebla: #8b94a3;         /* Texto secundario */
-  --niebla-2: #5c6674;       /* Texto tenue / deshabilitado */
-  --radius: 10px;            /* Radio de esquinas grandes */
-  --radius-sm: 6px;          /* Radio de esquinas pequeñas */
+  --asfalto: #0b0e14;               /* Pavimento asfáltico negro profundo */
+  --concreto: #131923;              /* Concreto bituminoso / fondo de paneles */
+  --panel-2: #1b2331;               /* Fondo secundario de controles y tarjetas */
+  --panel-3: #242f42;               /* Fondo interactivo hover y selección */
+  --linea: #2a374c;                 /* Juntas de pavimento y bordes de carril */
+  --linea-clara: #3d4e6b;           /* Borde reflectivo tenue */
+  
+  /* Paleta de Carretera, Señales y Conos de Seguridad */
+  --cono-naranja: #ff6a00;          /* 🔶 Naranja fluorescente cono de tráfico / precaución vial */
+  --cono-brillante: #ff8833;        /* Naranja cono iluminado */
+  --senial-amarillo: #ffd600;       /* ⚠️ Amarillo señal preventiva de tránsito / balizamiento */
+  --senial-amarillo-brillante: #ffea00; /* Amarillo reflectante */
+  --senial-verde: #00e676;          /* 🟢 Verde reflectivo de letreros de autopista / solo daños */
+  --senial-rojo: #ff1744;           /* 🔴 Rojo reflectante de señal de alto / fatalidades */
+  --senial-azul: #00b0ff;           /* 🔵 Azul letrero de información y servicios de carretera */
+  
+  /* Textos y contrastes de pavimento */
+  --hueso: #f8fafc;                 /* Blanco pintura termoplástica de carril */
+  --niebla: #94a3b8;                /* Texto secundario gris asfalto reflectante */
+  --niebla-2: #64748b;              /* Texto tenue / deshabilitado */
+  --radius: 10px;                   /* Radio de esquinas de paneles */
+  --radius-sm: 6px;                 /* Radio de esquinas de controles */
 }
 
 * { box-sizing: border-box; }
@@ -40,12 +49,12 @@ body {
 }
 
 ::selection {
-  background: var(--ambar);
-  color: #14171c;
+  background: var(--cono-naranja);
+  color: #0b0e14;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ambar);
+  outline: 2px solid var(--senial-amarillo);
   outline-offset: 2px;
 }
 
@@ -64,9 +73,9 @@ h1, h2, h3, .eyebrow, .kpi-value, .mono { font-family: 'Oswald', Arial Narrow, s
   min-height: 100vh;
 }
 
-/* ---------- CABECERA PRINCIPAL (HEADER) ---------- */
+/* ---------- CABECERA PRINCIPAL (HEADER CON FRANJA DE BALIZAMIENTO VIAL) ---------- */
 header.top {
-  background: linear-gradient(180deg, #181c22 0%, #14171c 100%);
+  background: linear-gradient(180deg, #161e2a 0%, #0f141d 100%);
   border-bottom: 2px solid var(--linea);
   padding: 18px 24px 14px;
   position: relative;
@@ -74,9 +83,13 @@ header.top {
 
 header.top::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
-  background: repeating-linear-gradient(90deg, var(--ambar) 0 26px, transparent 26px 46px);
-  opacity: .55;
+  position: absolute; left: 0; right: 0; bottom: -2px; height: 3px;
+  background: repeating-linear-gradient(90deg, 
+    var(--cono-naranja) 0 28px, 
+    var(--senial-amarillo) 28px 56px, 
+    transparent 56px 74px
+  );
+  opacity: .85;
 }
 
 .top-row {
@@ -84,12 +97,18 @@ header.top::after {
 }
 
 .eyebrow {
-  font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ambar);
-  font-weight: 600; margin: 0 0 4px;
+  font-size: 11.5px; letter-spacing: .15em; text-transform: uppercase; color: var(--cono-naranja);
+  font-weight: 700; margin: 0 0 4px; display: flex; align-items: center; gap: 6px;
+}
+
+.eyebrow::before {
+  content: "▲";
+  font-size: 8px;
+  color: var(--senial-amarillo);
 }
 
 h1 {
-  font-size: 26px; letter-spacing: .02em; text-transform: uppercase; margin: 0; font-weight: 700;
+  font-size: 26px; letter-spacing: .03em; text-transform: uppercase; margin: 0; font-weight: 700;
   color: var(--hueso);
 }
 
@@ -100,35 +119,38 @@ h1 small {
 
 .top-actions { display: flex; gap: 8px; align-items: center; }
 
-/* Botones de la cabecera */
+/* Botones de la cabecera estilo señalamiento */
 .btn {
   background: var(--panel-2); color: var(--hueso); border: 1px solid var(--linea);
   padding: 9px 14px; border-radius: var(--radius-sm); font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12.5px;
   cursor: pointer; letter-spacing: .02em; display: inline-flex; align-items: center; gap: 6px;
-  transition: border-color .15s, background .15s;
+  transition: border-color .15s, background .15s, transform .1s;
 }
 
-.btn:hover { border-color: var(--ambar); background: #262e38; }
-.btn.primary { background: var(--ambar); color: #1a1305; border-color: var(--ambar); }
-.btn.primary:hover { background: var(--ambar-2); }
+.btn:hover { border-color: var(--cono-naranja); background: var(--panel-3); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--cono-naranja); color: #0b0e14; border-color: var(--cono-naranja); font-weight: 700; }
+.btn.primary:hover { background: var(--cono-brillante); border-color: var(--cono-brillante); }
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ---------- TARJETAS DE INDICADORES CLAVE (KPIS) ---------- */
+/* ---------- TARJETAS DE INDICADORES CLAVE (KPIS VIALES) ---------- */
 .kpis {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px;
 }
 
 .kpi {
-  background: var(--concreto); border: 1px solid var(--linea); border-left: 3px solid var(--ambar);
+  background: var(--concreto); border: 1px solid var(--linea); border-left: 3.5px solid var(--cono-naranja);
   border-radius: var(--radius-sm); padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: border-color .15s;
 }
 
-.kpi.fatal { border-left-color: var(--carmesi); }
-.kpi.ok { border-left-color: var(--verde); }
+.kpi.fatal { border-left-color: var(--senial-rojo); }
+.kpi.ok { border-left-color: var(--senial-verde); }
 
 .kpi-label { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--niebla); font-weight: 600; font-family: 'Inter', sans-serif; }
-.kpi-value { font-size: 24px; font-weight: 600; margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+.kpi-value { font-size: 24px; font-weight: 600; margin-top: 3px; font-family: 'IBM Plex Mono', monospace; color: var(--hueso); }
 
 /* ---------- MAQUETACIÓN EN 3 COLUMNAS ---------- */
 main.layout {
@@ -151,8 +173,8 @@ main.layout {
 }
 
 .panel h2 .tag {
-  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--asfalto); background: var(--ambar);
-  padding: 1px 6px; border-radius: 20px; font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #0b0e14; background: var(--senial-amarillo);
+  padding: 1px 6px; border-radius: 20px; font-weight: 700;
 }
 
 /* ---------- COLUMNA IZQUIERDA: FILTROS ---------- */
@@ -168,7 +190,7 @@ main.layout {
   margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
 }
 
-.filter-title .mini-link { font-size: 10px; color: var(--ambar); cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 600; }
+.filter-title .mini-link { font-size: 10px; color: var(--cono-naranja); cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 600; }
 
 /* Fichas conmutables (Chips) */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -178,14 +200,14 @@ main.layout {
   transition: all .12s;
 }
 
-.chip.active { background: var(--ambar); border-color: var(--ambar); color: #1a1305; }
-.chip.fatal-active { background: var(--carmesi); border-color: var(--carmesi); color: #fff; }
+.chip.active { background: var(--cono-naranja); border-color: var(--cono-naranja); color: #0b0e14; font-weight: 700; }
+.chip.fatal-active { background: var(--senial-rojo); border-color: var(--senial-rojo); color: #fff; }
 .chip.small { padding: 5px 8px; font-size: 10.5px; }
 
 /* Controles Deslizantes Dobles (Range Sliders) */
 .range-wrap { position: relative; height: 34px; margin-top: 6px; }
 .range-track { position: absolute; left: 0; right: 0; top: 15px; height: 4px; background: var(--linea); border-radius: 2px; }
-.range-fill { position: absolute; top: 15px; height: 4px; background: var(--ambar); border-radius: 2px; }
+.range-fill { position: absolute; top: 15px; height: 4px; background: var(--cono-naranja); border-radius: 2px; }
 
 .range-wrap input[type=range] {
   position: absolute; top: 0; left: 0; width: 100%; margin: 0; height: 34px;
@@ -194,13 +216,13 @@ main.layout {
 
 .range-wrap input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; pointer-events: auto; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--ambar-2); border: 2px solid var(--asfalto); cursor: pointer; margin-top: 0;
+  background: var(--senial-amarillo); border: 2px solid var(--asfalto); cursor: pointer; margin-top: 0;
   box-shadow: 0 0 0 1px var(--linea);
 }
 
 .range-wrap input[type=range]::-moz-range-thumb {
   pointer-events: auto; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--ambar-2); border: 2px solid var(--asfalto); cursor: pointer;
+  background: var(--senial-amarillo); border: 2px solid var(--asfalto); cursor: pointer;
 }
 
 .range-wrap input[type=range]::-moz-range-track { background: transparent; }
@@ -219,7 +241,7 @@ main.layout {
 
 .check-row { display: flex; align-items: center; gap: 7px; padding: 4px 4px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 .check-row:hover { background: var(--panel-2); }
-.check-row input { accent-color: var(--ambar); cursor: pointer; }
+.check-row input { accent-color: var(--cono-naranja); cursor: pointer; }
 .check-row .cnt { margin-left: auto; color: var(--niebla-2); font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; }
 .check-row.hidden { display: none; }
 
@@ -239,25 +261,26 @@ main.layout {
 .tool-btn {
   background: var(--panel-2); border: 1px solid var(--linea); color: var(--niebla); width: 34px; height: 34px;
   border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px;
+  transition: all .15s;
 }
 
-.tool-btn.active { background: var(--ambar); border-color: var(--ambar); color: #1a1305; }
-.tool-btn:hover { border-color: var(--ambar); }
+.tool-btn.active { background: var(--cono-naranja); border-color: var(--cono-naranja); color: #0b0e14; font-weight: 700; }
+.tool-btn:hover { border-color: var(--cono-naranja); color: var(--hueso); }
 
 .color-select {
   background: var(--panel-2); border: 1px solid var(--linea); color: var(--hueso); border-radius: var(--radius-sm);
   padding: 7px 8px; font-size: 11.5px; font-family: 'Inter', sans-serif; font-weight: 600;
 }
 
-#map { height: 520px; width: 100%; background: #0d1013; position: relative; }
+#map { height: 520px; width: 100%; background: #0b0e14; position: relative; }
 
 .selection-badge {
-  display: none; align-items: center; gap: 8px; background: #2a2113; border: 1px solid var(--ambar); color: var(--ambar-2);
+  display: none; align-items: center; gap: 8px; background: rgba(255, 106, 0, 0.15); border: 1px solid var(--cono-naranja); color: var(--senial-amarillo-brillante);
   padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 20px; margin: 0 14px 10px;
 }
 
 .selection-badge.show { display: inline-flex; }
-.selection-badge button { background: none; border: none; color: var(--ambar-2); cursor: pointer; font-size: 14px; line-height: 1; }
+.selection-badge button { background: none; border: none; color: var(--senial-amarillo-brillante); cursor: pointer; font-size: 14px; line-height: 1; }
 
 .map-legend {
   display: flex; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--linea); font-size: 11px; color: var(--niebla); flex-wrap: wrap; align-items: center;
@@ -270,13 +293,13 @@ main.layout {
   user-select: none; transition: all .15s; display: inline-flex; align-items: center; font-size: 11px; color: var(--niebla);
 }
 
-.legend-chip:hover { border-color: var(--ambar); color: var(--hueso); }
-.legend-chip.active { background: var(--concreto); border-color: var(--ambar); color: var(--ambar-2); font-weight: 600; }
+.legend-chip:hover { border-color: var(--cono-naranja); color: var(--hueso); }
+.legend-chip.active { background: var(--concreto); border-color: var(--cono-naranja); color: var(--senial-amarillo); font-weight: 600; }
 
 .filter-block.highlight { animation: pulse-border 1.2s ease-in-out 2; }
 @keyframes pulse-border {
   0%, 100% { border-color: var(--linea); }
-  50% { border-color: var(--ambar); box-shadow: 0 0 10px rgba(245, 166, 35, 0.4); }
+  50% { border-color: var(--cono-naranja); box-shadow: 0 0 12px rgba(255, 106, 0, 0.5); }
 }
 
 /* ---------- PANEL HORARIO Y DÍA DE LA SEMANA ---------- */
@@ -284,7 +307,7 @@ main.layout {
 .time-chart-box { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
 .time-chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; gap: 4px; }
 .clock-note { font-size: 11px; color: var(--niebla); }
-.clock-note b { color: var(--ambar-2); }
+.clock-note b { color: var(--senial-amarillo); }
 
 /* ---------- COLUMNA DERECHA: GRÁFICOS COMPLEMENTARIOS ---------- */
 .charts-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
@@ -299,7 +322,7 @@ main.layout {
 .top-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
 .top-row .name { flex: 0 0 145px; color: var(--niebla); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-row .bar-track { flex: 1; background: var(--panel-2); border-radius: 3px; height: 9px; overflow: hidden; }
-.top-row .bar-fill { display: block; height: 100%; background: var(--verde); border-radius: 3px; }
+.top-row .bar-fill { display: block; height: 100%; background: var(--senial-verde); border-radius: 3px; }
 .top-row .val { flex: 0 0 34px; text-align: right; font-family: 'IBM Plex Mono', monospace; color: var(--niebla); }
 
 /* ---------- PIE DE PÁGINA (FOOTER) ---------- */
@@ -317,7 +340,7 @@ footer a { color: var(--niebla); }
 }
 
 .spinner {
-  width: 38px; height: 38px; border-radius: 50%; border: 3px solid var(--linea); border-top-color: var(--ambar);
+  width: 38px; height: 38px; border-radius: 50%; border: 3px solid var(--linea); border-top-color: var(--cono-naranja);
   animation: spin .8s linear infinite;
 }
 
@@ -330,8 +353,8 @@ footer a { color: var(--niebla); }
   background: var(--concreto) !important;
   color: var(--hueso) !important;
   border-radius: 8px !important;
-  border: 1px solid var(--linea) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .7) !important;
+  border: 1px solid var(--linea-clara) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .8) !important;
 }
 .maplibregl-popup-content {
   padding: 11px 13px !important;
@@ -353,14 +376,14 @@ footer a { color: var(--niebla); }
   border-bottom-color: var(--concreto) !important;
 }
 .leaflet-popup-content { margin: 11px 13px; font-family: 'Inter', sans-serif; font-size: 12px; }
-.pp-title { font-family: 'Oswald', sans-serif; font-size: 13px; text-transform: uppercase; color: var(--ambar-2); margin-bottom: 5px; font-weight: 600; }
+.pp-title { font-family: 'Oswald', sans-serif; font-size: 13px; text-transform: uppercase; color: var(--senial-amarillo); margin-bottom: 5px; font-weight: 600; }
 .pp-row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-top: 1px solid var(--linea); }
 .pp-row span:first-child { color: var(--niebla); }
 .pp-sev { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; margin-left: 6px; }
 
 /* Controles de Zoom MapLibre GL */
 .maplibregl-ctrl-group {
-  background: var(--panel) !important;
+  background: var(--panel-2) !important;
   border: 1px solid var(--linea) !important;
   border-radius: 6px !important;
   overflow: hidden;
@@ -381,16 +404,16 @@ footer a { color: var(--niebla); }
 }
 
 .cluster-icon {
-  display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family: 'IBM Plex Mono', monospace; font-weight: 600;
-  color: #14171c; border: 2px solid rgba(0, 0, 0, .35);
+  display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family: 'IBM Plex Mono', monospace; font-weight: 700;
+  color: #0b0e14; border: 2px solid rgba(0, 0, 0, .45);
 }
 
 .cl-sm { width: 34px; height: 34px; font-size: 11px; }
 .cl-md { width: 44px; height: 44px; font-size: 12.5px; }
 .cl-lg { width: 56px; height: 56px; font-size: 14px; }
-.c-green { background: radial-gradient(circle at 35% 30%, #6fd39d, var(--verde)); }
-.c-amber { background: radial-gradient(circle at 35% 30%, var(--ambar-2), var(--ambar)); }
-.c-red { background: radial-gradient(circle at 35% 30%, #f0847b, var(--carmesi)); color: #fff; }
+.c-green { background: radial-gradient(circle at 35% 30%, #69f0ae, var(--senial-verde)); }
+.c-amber { background: radial-gradient(circle at 35% 30%, var(--senial-amarillo-brillante), var(--senial-amarillo)); }
+.c-red { background: radial-gradient(circle at 35% 30%, #ff5252, var(--senial-rojo)); color: #fff; }
 
 .filters-toggle { display: none; }
 

@@ -113,32 +113,33 @@ const MapModule = {
         this.bindEvents();
     },
 
-    /** Retorna color según severidad: Verde (Solo daños), Naranja (Heridos), Rojo (Fatal) */
+    /** Retorna color según severidad: Verde Autopista (Solo daños), Amarillo Señal (Heridos), Rojo Alto (Fatal) */
     getSevColor(s) {
-        return s === 2 ? '#e1483d' : (s === 1 ? '#f5a623' : '#4caf7d');
+        return s === 2 ? '#ff1744' : (s === 1 ? '#ffd600' : '#00e676');
     },
 
     /** Retorna color según condición climática */
     getClimaColor(c) {
-        if (!c) return '#5c6674';
+        if (!c) return '#64748b';
         const u = c.toUpperCase();
-        if (u.includes('BUEN') || u.includes('DESPEJ')) return '#4caf7d';
-        if (u.includes('LLUV') || u.includes('NUBL')) return '#3fa0e0';
-        if (u.includes('NIEBL')) return '#e5e7eb';
-        return '#f5a623';
+        if (u.includes('BUEN') || u.includes('DESPEJ')) return '#00e676';
+        if (u.includes('LLUV') || u.includes('NUBL')) return '#00b0ff';
+        if (u.includes('NIEBL')) return '#f8fafc';
+        if (u.includes('MAL')) return '#ff1744';
+        return '#ffd600';
     },
 
     /** Retorna color según tipo de vehículo */
     getVehiculoColor(item) {
         const v = item.tipo_vehiculo || (item.vehiculos && item.vehiculos[0]) || '';
         const u = v.toUpperCase();
-        if (u.includes('MOTO')) return '#e1483d';
-        if (u.includes('AUTO') || u.includes('SEDAN') || u.includes('COMPACTO')) return '#3fa0e0';
-        if (u.includes('CAMIONETA') || u.includes('PICKUP') || u.includes('VANG')) return '#f5a623';
-        if (u.includes('BICICLETA') || u.includes('CICLO')) return '#4caf7d';
-        if (u.includes('PESADO') || u.includes('TRACTO') || u.includes('CAMION') || u.includes('AUTOBUS')) return '#a78bfa';
-        if (u.includes('PEATON')) return '#ec4899';
-        return '#8c9ba5';
+        if (u.includes('MOTO')) return '#ff1744';
+        if (u.includes('AUTO') || u.includes('SEDAN') || u.includes('COMPACTO')) return '#00b0ff';
+        if (u.includes('CAMIONETA') || u.includes('PICKUP') || u.includes('VANG')) return '#ff6a00';
+        if (u.includes('BICICLETA') || u.includes('CICLO')) return '#00e676';
+        if (u.includes('PESADO') || u.includes('TRACTO') || u.includes('CAMION') || u.includes('AUTOBUS')) return '#ffd600';
+        if (u.includes('PEATON')) return '#ff4081';
+        return '#94a3b8';
     },
 
     /** Retorna color para marcadores individuales según la variable activa */
@@ -195,12 +196,12 @@ const MapModule = {
                             ['linear'],
                             ['heatmap-density'],
                             0.0, 'rgba(0, 0, 0, 0)',
-                            0.04, 'rgba(0, 191, 255, 0.55)', // Borde exterior suave
-                            0.12, '#00BFFF',                  // 🔵 Azul eléctrico (punto único)
-                            0.26, '#00E676',                  // 🟢 Verde intenso (amplia franja para 2-3 choques)
-                            0.48, '#FFEA00',                  // 🟡 Amarillo brillante (franja para 4-7 choques)
-                            0.72, '#FF7A00',                  // 🟠 Naranja intenso (franja para 8-14 choques)
-                            0.92, '#FF0033'                   // 🔴 Rojo intenso (solo cúspide)
+                            0.04, 'rgba(0, 176, 255, 0.55)', // Borde exterior suave azul vial
+                            0.12, '#00B0FF',                  // 🔵 Azul señal informativa
+                            0.26, '#00E676',                  // 🟢 Verde autopista
+                            0.48, '#FFD600',                  // 🟡 Amarillo señal de tránsito
+                            0.72, '#FF6A00',                  // 🟠 Naranja fluorescente cono
+                            0.92, '#FF1744'                   // 🔴 Rojo señal de alto
                         ],
                         'heatmap-radius': [
                             'interpolate',
@@ -238,7 +239,7 @@ const MapModule = {
                     filter: ['==', ['get', 'isMask'], true],
                     paint: {
                         'fill-color': '#05070a',
-                        'fill-opacity': 0.70
+                        'fill-opacity': 0.75
                     }
                 });
             }
@@ -251,8 +252,8 @@ const MapModule = {
                     source: 'selection-src',
                     filter: ['!=', ['get', 'isMask'], true],
                     paint: {
-                        'fill-color': '#f5a623',
-                        'fill-opacity': 0.08
+                        'fill-color': '#ff6a00',
+                        'fill-opacity': 0.10
                     }
                 });
             }
@@ -263,7 +264,7 @@ const MapModule = {
                     source: 'selection-src',
                     filter: ['!=', ['get', 'isMask'], true],
                     paint: {
-                        'line-color': '#f5a623',
+                        'line-color': '#ff6a00',
                         'line-width': 2.5,
                         'line-dasharray': [3, 2]
                     }
@@ -529,28 +530,28 @@ const MapModule = {
         if (!el) return;
         if (window.App.colorMode === 'vehiculo') {
             const vOptions = [
-                ['Automóvil', '#3fa0e0'],
-                ['Motocicleta', '#e1483d'],
-                ['Camioneta Pasajeros', '#f5a623'],
-                ['Camioneta Carga', '#e67e22'],
-                ['Camión Carga', '#9b51e0'],
-                ['Bicicleta', '#4caf7d'],
-                ['Otros', '#8b94a3']
+                ['Automóvil', '#00b0ff'],
+                ['Motocicleta', '#ff1744'],
+                ['Camioneta', '#ff6a00'],
+                ['Carga / Pesado', '#ffd600'],
+                ['Bicicleta', '#00e676'],
+                ['Peatón', '#ff4081'],
+                ['Otros', '#94a3b8']
             ];
             el.innerHTML = vOptions.map(([label, col]) => `<span><span class="legend-dot" style="background:${col}"></span>${label}</span>`).join('');
         } else if (window.App.colorMode === 'sev') {
             el.innerHTML = `
-                <span><span class="legend-dot" style="background:#4caf7d"></span>Solo daños</span>
-                <span><span class="legend-dot" style="background:#f5a623"></span>Con heridos</span>
-                <span><span class="legend-dot" style="background:#e1483d"></span>Fatal</span>
+                <span><span class="legend-dot" style="background:#00e676"></span>Solo daños</span>
+                <span><span class="legend-dot" style="background:#ffd600"></span>Con heridos</span>
+                <span><span class="legend-dot" style="background:#ff1744"></span>Fatal</span>
             `;
         } else {
             el.innerHTML = `
-                <span><span class="legend-dot" style="background:#4caf7d"></span>Bueno</span>
-                <span><span class="legend-dot" style="background:#8b94a3"></span>Nublado</span>
-                <span><span class="legend-dot" style="background:#3fa0e0"></span>Lluvioso</span>
-                <span><span class="legend-dot" style="background:#e1483d"></span>Malo</span>
-                <span><span class="legend-dot" style="background:#5c6674"></span>Sin dato</span>
+                <span><span class="legend-dot" style="background:#00e676"></span>Bueno / Despejado</span>
+                <span><span class="legend-dot" style="background:#00b0ff"></span>Lluvia / Nublado</span>
+                <span><span class="legend-dot" style="background:#f8fafc"></span>Niebla</span>
+                <span><span class="legend-dot" style="background:#ff1744"></span>Malo</span>
+                <span><span class="legend-dot" style="background:#64748b"></span>Sin dato</span>
             `;
         }
     },
