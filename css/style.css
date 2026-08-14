@@ -324,14 +324,61 @@ footer a { color: var(--niebla); }
 @keyframes spin { to { transform: rotate(360deg); } }
 #loading p { color: var(--niebla); font-size: 13px; font-family: 'IBM Plex Mono', monospace; }
 
-/* ---------- ESTILOS POPUP LEAFLET Y AGRUPAMIENTO ---------- */
-.leaflet-popup-content-wrapper { background: var(--concreto); color: var(--hueso); border-radius: 8px; border: 1px solid var(--linea); }
-.leaflet-popup-tip { background: var(--concreto); border: 1px solid var(--linea); }
+/* ---------- ESTILOS POPUP LEAFLET Y MAPLIBRE GL ---------- */
+.leaflet-popup-content-wrapper,
+.maplibregl-popup-content {
+  background: var(--concreto) !important;
+  color: var(--hueso) !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--linea) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .7) !important;
+}
+.maplibregl-popup-content {
+  padding: 11px 13px !important;
+}
+.maplibregl-popup-close-button {
+  color: var(--niebla) !important;
+  font-size: 16px !important;
+  padding: 4px 8px !important;
+  right: 2px !important;
+  top: 2px !important;
+}
+.maplibregl-popup-close-button:hover {
+  color: var(--hueso) !important;
+  background: transparent !important;
+}
+.leaflet-popup-tip,
+.maplibregl-popup-tip {
+  border-top-color: var(--concreto) !important;
+  border-bottom-color: var(--concreto) !important;
+}
 .leaflet-popup-content { margin: 11px 13px; font-family: 'Inter', sans-serif; font-size: 12px; }
 .pp-title { font-family: 'Oswald', sans-serif; font-size: 13px; text-transform: uppercase; color: var(--ambar-2); margin-bottom: 5px; font-weight: 600; }
 .pp-row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-top: 1px solid var(--linea); }
 .pp-row span:first-child { color: var(--niebla); }
 .pp-sev { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10.5px; font-weight: 700; margin-left: 6px; }
+
+/* Controles de Zoom MapLibre GL */
+.maplibregl-ctrl-group {
+  background: var(--panel) !important;
+  border: 1px solid var(--linea) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+.maplibregl-ctrl-group button {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--linea) !important;
+}
+.maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+.maplibregl-ctrl-group button:hover {
+  background-color: var(--concreto) !important;
+}
+.maplibregl-ctrl-icon {
+  filter: invert(0.85) !important;
+}
 
 .cluster-icon {
   display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family: 'IBM Plex Mono', monospace; font-weight: 600;

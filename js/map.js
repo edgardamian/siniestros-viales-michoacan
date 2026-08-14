@@ -1,135 +1,116 @@
 /**
  * ==============================================================================
  * ARCHIVO: js/map.js
- * DESCRIPCIÓN: Módulo del Mapa Interactivo (Leaflet.js).
- * Administra el mapa, marcadores de accidentes, aglutinamiento (clusters),
- * mapa de calor (heatmap), popups con metadatos y herramientas de dibujo espacial.
+ * DESCRIPCIÓN: Módulo del Mapa Interactivo 3D (MapLibre GL WebGL + Supercluster).
+ * Administra la cartografía base de la ATDT, edificios 3D, mapa de calor suave,
+ * clusters de accidentes, popups detallados y herramientas espaciales.
  * ==============================================================================
  */
 
 const MapModule = {
     map: null,
-    clusterGroup: null,
-    markers: [],
+    is3D: false,
+    showBuildings: false,
+    pitch: 0,
+    bearing: 0,
+    currentPopup: null,
+    lastFilteredData: null,
+    supercluster: null,
+    activeMarkers: {},
+    drawMode: null,
+    drawPoints: [],
+    drawStart: null,
 
-    heatLayer: null,
-    baseMaps: {},
-    currentBaseMap: null,
-    lastColorMode: null,
+    // Estilos de mapas base: ATDT 3D Vector Tiles y Satélite
+    baseStyles: {
+        dark: 'https://www.mapabase.atdt.gob.mx/style_black_3d_places.json',
+        light: 'https://www.mapabase.atdt.gob.mx/style_3d.json',
+        bw: 'https://www.mapabase.atdt.gob.mx/style_white_3d_places.json',
+        satellite: {
+            version: 8,
+            sources: {
+                'esri-sat': {
+                    type: 'raster',
+                    tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+                    tileSize: 256,
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri'
+                }
+            },
+            layers: [{ id: 'esri-sat-layer', type: 'raster', source: 'esri-sat' }]
+        }
+    },
 
     /**
-     * Inicializa el mapa Leaflet en el contenedor HTML #map
+     * Inicializa el mapa MapLibre GL en el contenedor HTML #map
      * @param {Array} data - Registros iniciales filtrados
      */
     init(data) {
-        // Crear mapa centrado en el estado de Michoacán (Morelia)
-        this.map = L.map('map', { zoomControl: true, minZoom: 6, maxZoom: 18 })
-            .setView([19.706, -101.19], 12);
+        this.lastFilteredData = data;
+        const initialBasemap = (document.getElementById('basemap-mode') && document.getElementById('basemap-mode').value) || 'dark';
+        const styleUrl = this.baseStyles[initialBasemap] || this.baseStyles.dark;
 
-        // Función creadora de capas compatibles con MapLibreGL (estilos vectoriales 3D) y Raster
-        const createBaseLayer = (styleUrl, fallbackUrl, attribution) => {
-            if (typeof L !== 'undefined' && typeof L.maplibreGL === 'function' && styleUrl && styleUrl.endsWith('.json')) {
-                try {
-                    return L.maplibreGL({
-                        style: styleUrl,
-                        attribution: attribution || '&copy; ATDT · INEGI · OSM'
-                    });
-                } catch (err) {
-                    console.warn("Fallo al inicializar MapLibreGL con " + styleUrl + ", usando capa de respaldo:", err);
-                }
+        // Crear mapa WebGL centrado en Morelia, Michoacán
+        this.map = new maplibregl.Map({
+            container: 'map',
+            style: styleUrl,
+            center: [-101.19, 19.706],
+            zoom: 12,
+            minZoom: 6,
+            maxZoom: 18,
+            pitch: 0,
+            bearing: 0,
+            maxPitch: 75,
+            dragRotate: true,
+            pitchWithRotate: true
+        });
+
+        // Controles de navegación nativos (Zoom y brújula)
+        this.map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-left');
+
+        // Evento de inicialización de fuentes y capas una vez cargado el estilo inicial
+        const syncMapLayersAndData = () => {
+            this.setupLayers();
+            this.applyBuildingsVisibility();
+            const currentData = this.lastFilteredData || (window.DataModule && window.DataModule.filteredData) || (window.DataModule && window.DataModule.allData) || [];
+            if (currentData.length > 0) {
+                this.updateMap(currentData);
             }
-            return L.tileLayer(fallbackUrl, {
-                attribution: attribution || '&copy; OpenStreetMap',
-                maxZoom: 19
-            });
         };
 
-        // Mapas base: Claro (ATDT style_3d.json), Blanco y Negro (ATDT style_white_3d_places.json), Oscuro (ATDT style_black_3d_places.json) y Satélite (Esri)
-        this.baseMaps = {
-            light: createBaseLayer(
-                'https://www.mapabase.atdt.gob.mx/style_3d.json',
-                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-                '&copy; ATDT · INEGI · OSM'
-            ),
-            bw: createBaseLayer(
-                'https://www.mapabase.atdt.gob.mx/style_white_3d_places.json',
-                'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-                '&copy; ATDT · INEGI · OSM'
-            ),
-            dark: createBaseLayer(
-                'https://www.mapabase.atdt.gob.mx/style_black_3d_places.json',
-                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                '&copy; ATDT · INEGI · OSM'
-            ),
-            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
-                maxZoom: 19
-            })
-        };
-        const initialBasemap = (document.getElementById('basemap-mode') && document.getElementById('basemap-mode').value) || 'light';
-        this.currentBaseMap = this.baseMaps[initialBasemap] || this.baseMaps.light;
-        this.currentBaseMap.addTo(this.map);
+        this.map.on('load', () => {
+            syncMapLayersAndData();
+            this.renderLegend();
+        });
 
-        // Inicializar edificios 3D volumétricos con OSMBuildings
-        if (typeof OSMBuildings !== 'undefined') {
-            try {
-                this.osmb = new OSMBuildings(this.map);
-                this.osmb.load('https://{s}.data.osmbuildings.org/0.2/59f0f948/tile/{z}/{x}/{y}.json');
-                this.osmb.style({
-                    color: '#cbd5e1',
-                    roofColor: '#94a3b8',
-                    shadows: true
-                });
-            } catch (err) {
-                console.warn("OSMBuildings no pudo inicializarse:", err);
-            }
-        }
+        // Al cambiar de mapa base (setStyle), restaurar capas WebGL y fuentes de datos automáticamente
+        this.map.on('style.load', () => {
+            syncMapLayersAndData();
+        });
 
-        // Capa de mapa de calor con gradiente personalizado
-        this.heatLayer = L.heatLayer([], {
-            radius: 10,
-            blur: 8,
-            maxZoom: 16,
-            max: 25.0,
-            minOpacity: .5,
-            gradient: {
-                0.4: '#00BFFF',  // Azul eléctrico (baja densidad)
-                0.6: '#00E676',  // Verde intenso
-                0.8: '#FFEA00',  // Amarillo brillante
-                0.9: '#FF7A00',  // Naranja intenso
-                1.0: '#FF0033'   // Rojo intenso (alta densidad)
+        this.map.on('styledata', () => {
+            if (!this.map.getSource('accidents-heat-src') || !this.map.getLayer('accidents-heat-layer')) {
+                syncMapLayersAndData();
             }
         });
 
-        // Grupo de aglutinamiento de puntos (MarkerCluster)
-        this.clusterGroup = L.markerClusterGroup({
-            chunkedLoading: true,
-            maxClusterRadius: 55,
-            disableClusteringAtZoom: 16,
-            spiderfyOnMaxZoom: true,
-            iconCreateFunction: function (cluster) {
-                const children = cluster.getAllChildMarkers();
-                let fatal = 0, inj = 0;
-                for (const m of children) {
-                    const s = m.options.sevVal;
-                    if (s === 2) fatal++; else if (s === 1) inj++;
-                }
-                const count = children.length;
-                let sizeCls = 'cl-sm'; if (count >= 250) sizeCls = 'cl-lg'; else if (count >= 40) sizeCls = 'cl-md';
-                let colorCls = 'c-green'; if (fatal > 0) colorCls = 'c-red'; else if (inj > 0) colorCls = 'c-amber';
-                return L.divIcon({ html: '<div class="cluster-icon ' + sizeCls + ' ' + colorCls + '"><span>' + count + '</span></div>', className: '', iconSize: null });
+        // Actualizar clusters al mover o cambiar zoom/inclinación
+        this.map.on('move', () => {
+            this.renderMarkers();
+        });
+
+        // Detectar cambios en pitch para sincronizar el botón 3D
+        this.map.on('pitch', () => {
+            const p = this.map.getPitch();
+            this.is3D = (p > 15);
+            const btn = document.getElementById('tool-3d');
+            if (btn) {
+                btn.classList.toggle('active', this.is3D);
+                btn.innerText = '3D';
             }
         });
 
-        this.map.addLayer(this.clusterGroup);
-
-        // Construir marcadores individuales y pintar la selección inicial
-        this.buildMarkers(DataModule.allData);
-        this.updateMap(data);
-        this.renderLegend();
-
-        // Conectar herramientas de selección geográfica (rectángulo, círculo, polígono)
-        this.bindDrawTools();
+        // Conectar herramientas de selección geográfica y eventos
+        this.bindEvents();
     },
 
     /** Retorna color según severidad: Verde (Solo daños), Naranja (Heridos), Rojo (Fatal) */
@@ -139,121 +120,405 @@ const MapModule = {
 
     /** Retorna color según condición climática */
     getClimaColor(c) {
-        const cmap = { 'Bueno': '#4caf7d', 'Nublado': '#8b94a3', 'Lluvioso': '#3fa0e0', 'Malo': '#e1483d' };
-        return cmap[c] || '#5c6674';
+        if (!c) return '#5c6674';
+        const u = c.toUpperCase();
+        if (u.includes('BUEN') || u.includes('DESPEJ')) return '#4caf7d';
+        if (u.includes('LLUV') || u.includes('NUBL')) return '#3fa0e0';
+        if (u.includes('NIEBL')) return '#e5e7eb';
+        return '#f5a623';
     },
 
-    /** Retorna color específico por tipo de vehículo */
-    getVColor(v) {
-        const vmap = {
-            'AUTOMOVIL': '#3fa0e0',
-            'CAMIONETA DE PASAJEROS': '#f5a623',
-            'MOTOCICLETA': '#e1483d',
-            'CAMIONETA DE CARGA': '#e67e22',
-            'CAMIÓN DE CARGA': '#9b51e0',
-            'CAMIÓN DE PASAJEROS': '#e84393',
-            'BICICLETA': '#4caf7d',
-            'TRACTOR': '#16a085',
-            'PICK-UP': '#d35400',
-            'SUV / VAGONETA': '#27ae60',
-            'VEHÍCULO DE TRABAJO': '#8e44ad'
-        };
-        return vmap[v] || '#8b94a3';
-    },
-
-    /** Determina el color del vehículo activo en el registro */
+    /** Retorna color según tipo de vehículo */
     getVehiculoColor(item) {
-        if (!item.vehiculos || item.vehiculos.length === 0) return '#5c6674';
-        if (FiltersModule.activeFilters && FiltersModule.activeFilters.vehiculos && FiltersModule.fullSets.vehiculos) {
-            if (FiltersModule.activeFilters.vehiculos.size > 0 && FiltersModule.activeFilters.vehiculos.size < FiltersModule.fullSets.vehiculos.size) {
-                for (const v of item.vehiculos) {
-                    if (FiltersModule.activeFilters.vehiculos.has(v)) return this.getVColor(v);
-                }
-            }
-        }
-        return this.getVColor(item.vehiculos[0]);
+        const v = item.tipo_vehiculo || (item.vehiculos && item.vehiculos[0]) || '';
+        const u = v.toUpperCase();
+        if (u.includes('MOTO')) return '#e1483d';
+        if (u.includes('AUTO') || u.includes('SEDAN') || u.includes('COMPACTO')) return '#3fa0e0';
+        if (u.includes('CAMIONETA') || u.includes('PICKUP') || u.includes('VANG')) return '#f5a623';
+        if (u.includes('BICICLETA') || u.includes('CICLO')) return '#4caf7d';
+        if (u.includes('PESADO') || u.includes('TRACTO') || u.includes('CAMION') || u.includes('AUTOBUS')) return '#a78bfa';
+        if (u.includes('PEATON')) return '#ec4899';
+        return '#8c9ba5';
     },
 
-    /** Retorna el color adecuado del marcador según el modo seleccionado en la barra superior */
+    /** Retorna color para marcadores individuales según la variable activa */
     getMarkerColor(item) {
         if (window.App.colorMode === 'vehiculo') return this.getVehiculoColor(item);
         return window.App.colorMode === 'clima' ? this.getClimaColor(item.condiciones_climaticas) : this.getSevColor(item.sevVal);
     },
 
     /**
-     * Crea los marcadores circulares de Leaflet para cada registro de accidente.
+     * Configura fuentes y capas WebGL nativas dentro de MapLibre GL
      */
-    buildMarkers(allData) {
-        this.markers = new Array(allData.length);
-        allData.forEach((item) => {
-            const m = L.circleMarker([item.lat, item.lon], {
-                radius: 5, weight: 1, color: '#10141a', opacity: 0.55,
-                fillColor: this.getMarkerColor(item), fillOpacity: 0.85
-            });
-            m.options.sevVal = item.sevVal;
-            m.options.refItem = item;
+    setupLayers() {
+        if (!this.map) return;
 
-            // Al hacer clic sobre un punto en el mapa se despliega la ventana flotante (popup)
-            m.on('click', () => {
-                const sevBg = this.getSevColor(item.sevVal);
-                const sevLbl = item.sevVal === 2 ? 'Fatal' : (item.sevVal === 1 ? 'Con heridos' : 'Solo daños');
-                const vehiStr = item.vehiculos ? item.vehiculos.join(', ') : 'Sin datos';
-                const html = `
-                    <div class="pp-title">${item.tipo_incidente_vial || ''}<span class="pp-sev" style="background:${sevBg};color:${item.sevVal === 0 ? '#0c1a12' : '#fff'}">${sevLbl}</span></div>
-                    <div class="pp-row"><span>Fecha</span><span>${item.dia_incidente || ''} · ${String(item.hora_redondeada || '').padStart(2, '0')}:00</span></div>
-                    <div class="pp-row"><span>Municipio</span><span>${item.municipio || ''}</span></div>
-                    <div class="pp-row"><span>Colonia</span><span>${item.colonia || ''}</span></div>
-                    <div class="pp-row"><span>Vehículos</span><span>${vehiStr} (${item.numero_vehiculos_involucrados || 0})</span></div>
-                    <div class="pp-row"><span>Lesionados</span><span>${item.numero_personas_lesionadas || 0}</span></div>
-                    <div class="pp-row"><span>Fallecidos</span><span>${item.numero_personas_fallecidas || 0}</span></div>
-                    <div class="pp-row"><span>Clima</span><span>${item.condiciones_climaticas || ''}</span></div>
-                    <div class="pp-row"><span>Vía</span><span>${item.condiciones_via || ''}</span></div>
-                    <div class="pp-row"><span>Resp.</span><span>${item.sexo_presunto_responsable || ''} ${item.edad_presunto_responsable >= 0 ? '· ' + item.edad_presunto_responsable + ' años' : ''}</span></div>
-                    <div class="pp-row"><span>Toxicología</span><span>${item.resultados_toxicologia || ''}</span></div>
-                `;
-                m.bindPopup(html).openPopup();
-            });
-            this.markers[item._id] = m;
+        try {
+            // 1. Fuente no-agrupada para el Mapa de Calor WebGL
+            if (!this.map.getSource('accidents-heat-src')) {
+                this.map.addSource('accidents-heat-src', {
+                    type: 'geojson',
+                    data: { type: 'FeatureCollection', features: [] }
+                });
+            }
+
+            // 2. Capa de Mapa de Calor WebGL
+            if (!this.map.getLayer('accidents-heat-layer')) {
+                const heatLayerDef = {
+                    id: 'accidents-heat-layer',
+                    type: 'heatmap',
+                    source: 'accidents-heat-src',
+                    layout: {
+                        'visibility': (!window.App || window.App.layerMode === 'heat' || (document.getElementById('layer-mode') && document.getElementById('layer-mode').value === 'heat') ? 'visible' : 'none')
+                    },
+                    paint: {
+                        'heatmap-weight': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'weight'],
+                            0.1, 0.1,
+                            0.3, 0.3,
+                            0.6, 0.6
+                        ],
+                        'heatmap-intensity': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            6, 0.18,
+                            10, 0.35,
+                            12, 0.52,
+                            14, 0.70,
+                            17, 0.90
+                        ],
+                        'heatmap-color': [
+                            'interpolate',
+                            ['linear'],
+                            ['heatmap-density'],
+                            0.0, 'rgba(0, 0, 0, 0)',
+                            0.04, 'rgba(0, 191, 255, 0.55)', // Borde exterior suave
+                            0.12, '#00BFFF',                  // 🔵 Azul eléctrico (punto único)
+                            0.26, '#00E676',                  // 🟢 Verde intenso (amplia franja para 2-3 choques)
+                            0.48, '#FFEA00',                  // 🟡 Amarillo brillante (franja para 4-7 choques)
+                            0.72, '#FF7A00',                  // 🟠 Naranja intenso (franja para 8-14 choques)
+                            0.92, '#FF0033'                   // 🔴 Rojo intenso (solo cúspide)
+                        ],
+                        'heatmap-radius': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            6, 4,
+                            8, 8,
+                            10, 14,
+                            12, 20,                           // Radio más amplio y suave
+                            14, 28,
+                            16, 38,
+                            18, 50
+                        ],
+                        'heatmap-opacity': 0.85
+                    }
+                };
+
+                this.map.addLayer(heatLayerDef);
+            }
+
+            // 3. Fuente para dibujo de selección espacial (rectángulo, círculo, polígono)
+            if (!this.map.getSource('selection-src')) {
+                this.map.addSource('selection-src', {
+                    type: 'geojson',
+                    data: { type: 'FeatureCollection', features: [] }
+                });
+            }
+
+            // Capa de máscara exterior oscura (resalta el área seleccionada y oculta/atenúa el exterior)
+            if (!this.map.getLayer('selection-mask')) {
+                this.map.addLayer({
+                    id: 'selection-mask',
+                    type: 'fill',
+                    source: 'selection-src',
+                    filter: ['==', ['get', 'isMask'], true],
+                    paint: {
+                        'fill-color': '#05070a',
+                        'fill-opacity': 0.70
+                    }
+                });
+            }
+
+            // Capa de selección espacial interior (polígono y contorno)
+            if (!this.map.getLayer('selection-fill')) {
+                this.map.addLayer({
+                    id: 'selection-fill',
+                    type: 'fill',
+                    source: 'selection-src',
+                    filter: ['!=', ['get', 'isMask'], true],
+                    paint: {
+                        'fill-color': '#f5a623',
+                        'fill-opacity': 0.08
+                    }
+                });
+            }
+            if (!this.map.getLayer('selection-line')) {
+                this.map.addLayer({
+                    id: 'selection-line',
+                    type: 'line',
+                    source: 'selection-src',
+                    filter: ['!=', ['get', 'isMask'], true],
+                    paint: {
+                        'line-color': '#f5a623',
+                        'line-width': 2.5,
+                        'line-dasharray': [3, 2]
+                    }
+                });
+            }
+
+        } catch (err) {
+            console.warn("setupLayers error:", err);
+        }
+    },
+
+    /**
+     * Limpia los marcadores DOM de la vista
+     */
+    clearMarkers() {
+        for (const id in this.activeMarkers) {
+            this.activeMarkers[id].remove();
+        }
+        this.activeMarkers = {};
+    },
+
+    /**
+     * Renderiza marcadores DOM individuales y clusters
+     */
+    renderMarkers() {
+        if (!this.supercluster || !this.map) return;
+
+        // Si la capa activa es el mapa de calor, ocultar todos los puntos y clusters
+        if (window.App && window.App.layerMode === 'heat') {
+            this.clearMarkers();
+            return;
+        }
+
+        const bounds = this.map.getBounds();
+        const bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+        const zoom = Math.floor(this.map.getZoom());
+
+        const clusters = this.supercluster.getClusters(bbox, zoom);
+        const newMarkers = {};
+
+        clusters.forEach((f) => {
+            const [lng, lat] = f.geometry.coordinates;
+            const isCluster = f.properties.cluster;
+            const id = isCluster ? `c_${f.properties.cluster_id}` : `p_${f.properties.id}`;
+
+            if (this.activeMarkers[id]) {
+                newMarkers[id] = this.activeMarkers[id];
+                delete this.activeMarkers[id];
+                return;
+            }
+
+            const el = document.createElement('div');
+
+            if (isCluster) {
+                const count = f.properties.point_count;
+                const fatal = f.properties.fatal || 0;
+                const inj = f.properties.inj || 0;
+
+                const cClass = fatal > 0 ? 'c-red' : (inj > 0 ? 'c-amber' : 'c-green');
+                const sClass = count < 20 ? 'cl-sm' : (count < 100 ? 'cl-md' : 'cl-lg');
+                el.className = `cluster-icon ${sClass} ${cClass}`;
+                el.innerText = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count;
+                el.style.cursor = 'pointer';
+
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const expansionZoom = this.supercluster.getClusterExpansionZoom(f.properties.cluster_id);
+                    if (expansionZoom > 17) {
+                        const leaves = this.supercluster.getLeaves(f.properties.cluster_id, 10, 0);
+                        this.showClusterSummaryPopup(f.properties, leaves, [lng, lat]);
+                        return;
+                    }
+                    this.map.easeTo({
+                        center: [lng, lat],
+                        zoom: Math.min(18, expansionZoom),
+                        duration: 350
+                    });
+                });
+            } else {
+                const item = DataModule.allData[f.properties.id];
+                if (!item) return;
+
+                const color = this.getMarkerColor(item);
+                el.className = 'point-marker-wrap';
+                el.style.width = '24px';
+                el.style.height = '24px';
+                el.style.display = 'flex';
+                el.style.alignItems = 'center';
+                el.style.justifyContent = 'center';
+                el.style.cursor = 'pointer';
+
+                const dot = document.createElement('div');
+                dot.className = 'point-marker-dot';
+                dot.style.width = '10px';
+                dot.style.height = '10px';
+                dot.style.borderRadius = '50%';
+                dot.style.backgroundColor = color;
+                dot.style.border = '1.5px solid #10141a';
+                dot.style.boxShadow = '0 2px 6px rgba(0,0,0,0.6)';
+                dot.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
+                el.appendChild(dot);
+
+                el.addEventListener('mouseenter', () => {
+                    dot.style.transform = 'scale(1.5)';
+                    dot.style.boxShadow = '0 0 8px ' + color;
+                });
+                el.addEventListener('mouseleave', () => {
+                    dot.style.transform = 'scale(1)';
+                    dot.style.boxShadow = '0 2px 6px rgba(0,0,0,0.6)';
+                });
+
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showPopup(item, [lng, lat]);
+                });
+            }
+
+            const marker = new maplibregl.Marker({ element: el })
+                .setLngLat([lng, lat])
+                .addTo(this.map);
+
+            newMarkers[id] = marker;
         });
+
+        // Remover marcadores que salieron del encuadre
+        for (const id in this.activeMarkers) {
+            this.activeMarkers[id].remove();
+        }
+        this.activeMarkers = newMarkers;
+    },
+
+    /**
+     * Despliega la ventana emergente con lista resumida para clusters superpuestos
+     */
+    showClusterSummaryPopup(props, leaves, coords) {
+        const count = props.point_count;
+        let itemsHtml = '';
+        leaves.slice(0, 5).forEach((leaf) => {
+            const item = DataModule.allData[leaf.properties.id];
+            if (!item) return;
+            const sevBg = this.getSevColor(item.sevVal);
+            const sevLbl = item.sevVal === 2 ? 'Fatal' : (item.sevVal === 1 ? 'Con heridos' : 'Solo daños');
+            itemsHtml += `
+                <div style="margin-top: 6px; padding-top: 4px; border-top: 1px dashed var(--linea); font-size: 11px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b style="color:var(--ambar-2);">${item.tipo_incidente_vial || 'Accidente'}</b>
+                        <span class="pp-sev" style="background:${sevBg};color:#fff;font-size:9.5px;padding:1px 5px;">${sevLbl}</span>
+                    </div>
+                    <div style="color:var(--niebla);">${item.dia_incidente || ''} · ${String(item.hora_redondeada || '').padStart(2, '0')}:00</div>
+                </div>
+            `;
+        });
+
+        const html = `
+            <div class="pp-title">Grupo de ${count} Accidentes</div>
+            <div class="pp-row"><span>Fallecidos</span><span>${props.fatal || 0}</span></div>
+            <div class="pp-row"><span>Lesionados</span><span>${props.inj || 0}</span></div>
+            ${itemsHtml}
+            ${count > 5 ? `<div style="text-align:center; color:var(--niebla); font-size:10.5px; margin-top:5px;">+ ${count - 5} accidentes más en este punto</div>` : ''}
+        `;
+
+        if (this.currentPopup) this.currentPopup.remove();
+        this.currentPopup = new maplibregl.Popup({ offset: 12, closeOnClick: false, closeButton: true, maxWidth: '320px' })
+            .setLngLat(coords)
+            .setHTML(html)
+            .addTo(this.map);
+    },
+
+    /**
+     * Despliega la ventana emergente con metadatos del accidente
+     */
+    showPopup(item, coords) {
+        const sevBg = this.getSevColor(item.sevVal);
+        const sevLbl = item.sevVal === 2 ? 'Fatal' : (item.sevVal === 1 ? 'Con heridos' : 'Solo daños');
+        const vehiStr = item.vehiculos ? item.vehiculos.join(', ') : 'Sin datos';
+        const html = `
+            <div class="pp-title">${item.tipo_incidente_vial || ''}<span class="pp-sev" style="background:${sevBg};color:${item.sevVal === 0 ? '#0c1a12' : '#fff'}">${sevLbl}</span></div>
+            <div class="pp-row"><span>Fecha</span><span>${item.dia_incidente || ''} · ${String(item.hora_redondeada || '').padStart(2, '0')}:00</span></div>
+            <div class="pp-row"><span>Municipio</span><span>${item.municipio || ''}</span></div>
+            <div class="pp-row"><span>Colonia</span><span>${item.colonia || ''}</span></div>
+            <div class="pp-row"><span>Vehículos</span><span>${vehiStr} (${item.numero_vehiculos_involucrados || 0})</span></div>
+            <div class="pp-row"><span>Lesionados</span><span>${item.numero_personas_lesionadas || 0}</span></div>
+            <div class="pp-row"><span>Fallecidos</span><span>${item.numero_personas_fallecidas || 0}</span></div>
+            <div class="pp-row"><span>Clima</span><span>${item.condiciones_climaticas || ''}</span></div>
+            <div class="pp-row"><span>Vía</span><span>${item.condiciones_via || ''}</span></div>
+            <div class="pp-row"><span>Resp.</span><span>${item.sexo_presunto_responsable || ''} ${item.edad_presunto_responsable >= 0 ? '· ' + item.edad_presunto_responsable + ' años' : ''}</span></div>
+            <div class="pp-row"><span>Toxicología</span><span>${item.resultados_toxicologia || ''}</span></div>
+        `;
+
+        if (this.currentPopup) this.currentPopup.remove();
+        this.currentPopup = new maplibregl.Popup({ offset: 12, closeOnClick: false, closeButton: true, maxWidth: '320px' })
+            .setLngLat(coords)
+            .setHTML(html)
+            .addTo(this.map);
     },
 
     /**
      * Refresca las capas activas del mapa al aplicar cualquier filtro
      */
     updateMap(filteredData) {
-        if (window.App.layerMode === 'heat') {
-            // Cambiar a vista de Mapa de Calor
-            if (this.map.hasLayer(this.clusterGroup)) this.map.removeLayer(this.clusterGroup);
-            if (!this.map.hasLayer(this.heatLayer)) this.heatLayer.addTo(this.map);
+        this.lastFilteredData = filteredData;
+        if (!this.map) return;
 
-            const len = filteredData.length;
-            const heatData = new Array(len);
-            for (let i = 0; i < len; i++) {
-                const item = filteredData[i];
-                heatData[i] = [item.lat, item.lon, item.sevVal === 2 ? 1.0 : (item.sevVal === 1 ? 0.4 : 0.15)];
-            }
-            this.heatLayer.setLatLngs(heatData);
-        } else {
-            // Cambiar a vista de Puntos con Aglutinamiento
-            if (this.map.hasLayer(this.heatLayer)) this.map.removeLayer(this.heatLayer);
-            if (!this.map.hasLayer(this.clusterGroup)) this.clusterGroup.addTo(this.map);
+        // Limpiar marcadores antiguos para evitar reutilizar IDs desactualizados de Supercluster
+        this.clearMarkers();
+        this.setupLayers();
 
-            this.clusterGroup.clearLayers();
-            const len = filteredData.length;
-            const activeLayers = new Array(len);
-            const colorChanged = (this.lastColorMode !== window.App.colorMode);
-            this.lastColorMode = window.App.colorMode;
-
-            for (let k = 0; k < len; k++) {
-                const item = filteredData[k];
-                const m = this.markers[item._id];
-                if (colorChanged) {
-                    m.setStyle({ fillColor: this.getMarkerColor(item) });
+        const dataToRender = filteredData || this.lastFilteredData || (window.DataModule && window.DataModule.filteredData) || (window.DataModule && window.DataModule.allData) || [];
+        const len = dataToRender.length;
+        const features = new Array(len);
+        for (let i = 0; i < len; i++) {
+            const item = dataToRender[i];
+            features[i] = {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [item.lon, item.lat] },
+                properties: {
+                    id: item._id,
+                    sevVal: item.sevVal,
+                    weight: (item.sevVal === 2 ? 0.6 : (item.sevVal === 1 ? 0.3 : 0.1)),
+                    color: this.getMarkerColor(item)
                 }
-                activeLayers[k] = m;
-            }
-            this.clusterGroup.addLayers(activeLayers);
+            };
         }
+
+        const geojson = { type: 'FeatureCollection', features };
+
+        // Actualizar datos del mapa de calor WebGL
+        const heatSrc = this.map.getSource('accidents-heat-src');
+        if (heatSrc) heatSrc.setData(geojson);
+
+        // Inicializar motor Supercluster
+        if (typeof Supercluster !== 'undefined') {
+            this.supercluster = new Supercluster({
+                radius: 38,   // Radio de agrupación compacto
+                maxZoom: 16,  // Agrupamiento hasta zoom 16
+                map: (props) => ({
+                    fatal: props.sevVal === 2 ? 1 : 0,
+                    inj: props.sevVal === 1 ? 1 : 0
+                }),
+                reduce: (accumulated, props) => {
+                    accumulated.fatal += props.fatal;
+                    accumulated.inj += props.inj;
+                }
+            });
+            this.supercluster.load(features);
+        }
+
+        // Conmutar visibilidad entre Calor y Puntos/Clusters
+        const isHeat = (!window.App || window.App.layerMode === 'heat' || (document.getElementById('layer-mode') && document.getElementById('layer-mode').value === 'heat'));
+        if (this.map.getLayer('accidents-heat-layer')) {
+            this.map.setLayoutProperty('accidents-heat-layer', 'visibility', isHeat ? 'visible' : 'none');
+        }
+
+        // Renderizar marcadores y clusters DOM sincronizados en 3D
+        this.renderMarkers();
     },
 
     /**
@@ -291,155 +556,92 @@ const MapModule = {
     },
 
     /**
-     * Configura las herramientas interactivas de dibujo espacial (rectángulo, círculo y polígono)
+     * Alterna la perspectiva 3D (0° vs 60° pitch)
      */
-    bindDrawTools() {
-        let drawMode = null;
-        let rectLayer = null, rectStart = null;
-        let circleLayer = null, circleCenterLatLng = null;
-        let polyLayer = null, polyPoints = [];
+    toggle3D(enable) {
+        this.is3D = (enable !== undefined) ? enable : !this.is3D;
+        const targetPitch = this.is3D ? 60 : 0;
+        this.map.easeTo({ pitch: targetPitch, duration: 800 });
 
-        // Cancela cualquier modo de dibujo activo
-        const exitDrawMode = () => {
-            drawMode = null;
-            this.map.dragging.enable();
-            document.getElementById('map').style.cursor = '';
-            document.getElementById('tool-rect').classList.remove('active');
-            document.getElementById('tool-circle').classList.remove('active');
-            document.getElementById('tool-poly').classList.remove('active');
-        };
+        const btn3D = document.getElementById('tool-3d');
+        if (btn3D) {
+            btn3D.classList.toggle('active', this.is3D);
+            btn3D.innerText = '3D';
+        }
+    },
 
-        // Eventos para botones de la barra del mapa
-        document.getElementById('tool-rect').addEventListener('click', (e) => {
-            if (drawMode === 'rect') { exitDrawMode(); return; }
-            exitDrawMode();
-            drawMode = 'rect';
-            this.map.dragging.disable();
-            document.getElementById('map').style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
-        document.getElementById('tool-circle').addEventListener('click', (e) => {
-            if (drawMode === 'circle') { exitDrawMode(); return; }
-            exitDrawMode();
-            drawMode = 'circle';
-            this.map.dragging.disable();
-            document.getElementById('map').style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
-        document.getElementById('tool-poly').addEventListener('click', (e) => {
-            if (drawMode === 'poly') { exitDrawMode(); return; }
-            exitDrawMode();
-            drawMode = 'poly';
-            polyPoints = [];
-            this.map.dragging.disable();
-            document.getElementById('map').style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
+    /**
+     * Alterna la visibilidad de los edificios 3D
+     */
+    toggleBuildings(enable) {
+        this.showBuildings = (enable !== undefined) ? enable : !this.showBuildings;
+        const btn = document.getElementById('tool-buildings');
+        if (btn) {
+            btn.classList.toggle('active', this.showBuildings);
+        }
+        this.applyBuildingsVisibility();
+    },
 
-        // Movimiento del mouse durante el trazo de figuras
-        const onRectMove = (e) => { if (rectLayer && rectStart) rectLayer.setBounds([rectStart, e.latlng]); };
-        const onCircleMove = (e) => {
-            if (circleLayer && circleCenterLatLng) {
-                const haversineMeters = (lat1, lon1, lat2, lon2) => {
-                    const R = 6371000, toRad = Math.PI / 180;
-                    const dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
-                    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) ** 2;
-                    return 2 * R * Math.asin(Math.sqrt(a));
-                };
-                circleLayer.setRadius(haversineMeters(circleCenterLatLng.lat, circleCenterLatLng.lng, e.latlng.lat, e.latlng.lng));
+    /**
+     * Aplica la visibilidad a todas las capas de edificios en el estilo activo
+     */
+    applyBuildingsVisibility() {
+        if (!this.map) return;
+        const style = this.map.getStyle();
+        if (!style || !style.layers) return;
+        const vis = this.showBuildings ? 'visible' : 'none';
+        style.layers.forEach(l => {
+            if (l.type === 'fill-extrusion' || (l.id && (l.id.includes('building') || l.id.includes('edificio') || l.id.includes('lote') || l.id.includes('manzana')) && l.type !== 'symbol')) {
+                try {
+                    this.map.setLayoutProperty(l.id, 'visibility', vis);
+                } catch (e) { }
+            }
+        });
+    },
+
+    /**
+     * Cambia el mapa base activo de forma segura
+     */
+    setBasemap(key) {
+        const style = this.baseStyles[key] || this.baseStyles.dark;
+        this.map.setStyle(style);
+
+        const onDone = () => {
+            this.setupLayers();
+            this.applyBuildingsVisibility();
+            const currentData = this.lastFilteredData || (window.DataModule && window.DataModule.filteredData) || (window.DataModule && window.DataModule.allData) || [];
+            if (currentData.length > 0) {
+                this.updateMap(currentData);
             }
         };
 
-        // Inicio del trazo con el botón primario del ratón
-        this.map.on('mousedown', (e) => {
-            if (drawMode === 'rect') {
-                rectStart = e.latlng;
-                if (rectLayer) this.map.removeLayer(rectLayer);
-                rectLayer = L.rectangle([rectStart, rectStart], { color: '#f5a623', weight: 2, fillOpacity: .08 });
-                rectLayer.addTo(this.map);
-                this.map.on('mousemove', onRectMove);
-            } else if (drawMode === 'circle') {
-                circleCenterLatLng = e.latlng;
-                if (circleLayer) this.map.removeLayer(circleLayer);
-                circleLayer = L.circle(circleCenterLatLng, { radius: 1, color: '#f5a623', weight: 2, fillOpacity: .08 });
-                circleLayer.addTo(this.map);
-                this.map.on('mousemove', onCircleMove);
-            }
+        this.map.once('style.load', onDone);
+        this.map.once('idle', onDone);
+    },
+
+    /**
+     * Conecta todos los eventos de interfaz del mapa (selectores, herramientas de dibujo, botones)
+     */
+    bindEvents() {
+        // Selector de estilo de mapa base
+        document.getElementById('basemap-mode').addEventListener('change', (e) => {
+            this.setBasemap(e.target.value);
         });
 
-        // Agregar vértices al polígono libre
-        this.map.on('click', (e) => {
-            if (drawMode === 'poly') {
-                polyPoints.push(e.latlng);
-                if (polyLayer) this.map.removeLayer(polyLayer);
-                polyLayer = L.polygon(polyPoints, { color: '#f5a623', weight: 2, fillOpacity: .08 });
-                polyLayer.addTo(this.map);
-            }
-        });
-
-        // Clic derecho para cerrar y aplicar la selección del polígono
-        this.map.on('contextmenu', (e) => {
-            if (drawMode === 'poly' && polyPoints.length > 2) {
-                window.App.selection = { type: 'poly', points: [...polyPoints] };
-                polyPoints = [];
-                exitDrawMode();
-                document.getElementById('selection-badge').classList.add('show');
-                window.App.scheduleUpdate();
-            }
-        });
-
-        // Finalizar trazo al soltar el botón del ratón
-        this.map.on('mouseup', (e) => {
-            if (drawMode === 'rect' && rectStart) {
-                this.map.off('mousemove', onRectMove);
-                const b = rectLayer.getBounds();
-                window.App.selection = { type: 'rect', s: b.getSouth(), n: b.getNorth(), w: b.getWest(), e: b.getEast() };
-                rectStart = null;
-                exitDrawMode();
-                document.getElementById('selection-badge').classList.add('show');
-                window.App.scheduleUpdate();
-            } else if (drawMode === 'circle' && circleCenterLatLng) {
-                this.map.off('mousemove', onCircleMove);
-                window.App.selection = { type: 'circle', lat: circleCenterLatLng.lat, lng: circleCenterLatLng.lng, r: circleLayer.getRadius() };
-                circleCenterLatLng = null;
-                exitDrawMode();
-                document.getElementById('selection-badge').classList.add('show');
-                window.App.scheduleUpdate();
-            }
-        });
-
-        // Limpiar cualquier selección del mapa
-        const clearSelection = () => {
-            window.App.selection = null;
-            if (rectLayer) { this.map.removeLayer(rectLayer); rectLayer = null; }
-            if (circleLayer) { this.map.removeLayer(circleLayer); circleLayer = null; }
-            if (polyLayer) { this.map.removeLayer(polyLayer); polyLayer = null; }
-            polyPoints = [];
-            document.getElementById('selection-badge').classList.remove('show');
+        // Selector de vista (Calor / Puntos)
+        document.getElementById('layer-mode').addEventListener('change', (e) => {
+            window.App.layerMode = e.target.value;
             window.App.scheduleUpdate();
-        };
-        document.getElementById('tool-clear').addEventListener('click', clearSelection);
-        document.getElementById('selection-clear-x').addEventListener('click', clearSelection);
+        });
 
-        // Cambios en selectores de la barra del mapa (Color, Mapa base, Vista)
+        // Selector de color
         document.getElementById('color-mode').addEventListener('change', (e) => {
             window.App.colorMode = e.target.value;
             this.renderLegend();
             window.App.scheduleUpdate();
         });
 
-        document.getElementById('basemap-mode').addEventListener('change', (e) => {
-            this.map.removeLayer(this.currentBaseMap);
-            this.currentBaseMap = this.baseMaps[e.target.value];
-            this.currentBaseMap.addTo(this.map);
-        });
-
-        document.getElementById('layer-mode').addEventListener('change', (e) => {
-            window.App.layerMode = e.target.value;
-            window.App.scheduleUpdate();
-        });
-
-        // Botón único para alternar 3D
+        // Botón 3D
         const btn3D = document.getElementById('tool-3d');
         if (btn3D) {
             btn3D.addEventListener('click', () => {
@@ -447,118 +649,265 @@ const MapModule = {
             });
         }
 
-        // Navegación 3D: Inclinación y rotación con Clic Derecho + Arrastre o Ctrl + Clic Izquierdo + Arrastre
-        const mapContainer = document.getElementById('map');
-        let isDragging3D = false;
-        let startX = 0, startY = 0;
-        let startPitch = 0, startBearing = 0;
-
-        mapContainer.addEventListener('contextmenu', (e) => {
-            if (isDragging3D) {
-                e.preventDefault();
-            }
-        });
-
-        mapContainer.addEventListener('mousedown', (e) => {
-            // Clic derecho (button 2) o Ctrl + Clic izquierdo (button 0 + ctrlKey)
-            if (e.button === 2 || (e.button === 0 && e.ctrlKey)) {
-                isDragging3D = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startPitch = this.pitch || 0;
-                startBearing = this.bearing || 0;
-                mapContainer.style.cursor = 'grab';
-                e.preventDefault();
-            }
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging3D) return;
-            const deltaX = e.clientX - startX;
-            const deltaY = startY - e.clientY;
-
-            const newPitch = Math.max(0, Math.min(75, startPitch + deltaY * 0.45));
-            const newBearing = Math.max(-180, Math.min(180, startBearing + deltaX * 0.45));
-
-            this.is3D = (newPitch > 10);
-            const btn = document.getElementById('tool-3d');
-            if (btn) {
-                if (this.is3D) {
-                    btn.classList.add('active');
-                    btn.innerText = '🧊 3D';
-                } else {
-                    btn.classList.remove('active');
-                    btn.innerText = '3D';
-                }
-            }
-            this.setCamera3D(newPitch, newBearing, false);
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (isDragging3D) {
-                isDragging3D = false;
-                mapContainer.style.cursor = '';
-            }
-        });
-    },
-
-    /**
-     * Alterna entre modo 2D y 3D con un solo clic
-     */
-    toggle3D(enable) {
-        this.is3D = (enable !== undefined) ? enable : !this.is3D;
-        const targetPitch = this.is3D ? 60 : 0;
-        const targetBearing = this.is3D ? (this.bearing || 0) : 0;
-        this.setCamera3D(targetPitch, targetBearing, true);
-
-        const btn3D = document.getElementById('tool-3d');
-        if (btn3D) {
-            if (this.is3D) {
-                btn3D.classList.add('active');
-                btn3D.innerText = '🧊 3D';
-            } else {
-                btn3D.classList.remove('active');
-                btn3D.innerText = '3D';
-            }
+        // Botón Edificios 3D
+        const btnBld = document.getElementById('tool-buildings');
+        if (btnBld) {
+            btnBld.addEventListener('click', () => {
+                this.toggleBuildings();
+            });
         }
-    },
 
-    /**
-     * Ajusta la inclinación (pitch) y orientación (bearing) de la cámara en WebGL y OSMBuildings
-     */
-    setCamera3D(pitch, bearing, animate = false) {
-        this.pitch = pitch;
-        this.bearing = bearing;
+        // --- Herramientas de Dibujo Espacial (Rectángulo, Círculo, Polígono) ---
+        const exitDrawMode = () => {
+            this.drawMode = null;
+            this.drawPoints = [];
+            this.drawStart = null;
+            this.map.dragPan.enable();
+            this.map.doubleClickZoom.enable();
+            this.map.getCanvas().style.cursor = '';
+            document.getElementById('tool-rect').classList.remove('active');
+            document.getElementById('tool-circle').classList.remove('active');
+            document.getElementById('tool-poly').classList.remove('active');
+        };
 
-        // Control nativo de cámara MapLibre GL
-        if (this.currentBaseMap && typeof this.currentBaseMap.getMaplibreMap === 'function') {
-            try {
-                const glMap = this.currentBaseMap.getMaplibreMap();
-                if (glMap) {
-                    if (animate) {
-                        glMap.easeTo({ pitch: pitch, bearing: bearing, duration: 700 });
-                    } else {
-                        glMap.setPitch(pitch);
-                        glMap.setBearing(bearing);
+        const updateSelectionGeoJSON = (geojsonOrCoords) => {
+            const src = this.map.getSource('selection-src');
+            if (!src) return;
+            if (!geojsonOrCoords) {
+                src.setData({ type: 'FeatureCollection', features: [] });
+                return;
+            }
+
+            // Si se pasa un arreglo de coordenadas del anillo cerrado
+            if (Array.isArray(geojsonOrCoords)) {
+                const ring = geojsonOrCoords;
+                const worldBox = [[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]];
+                const features = [
+                    {
+                        type: 'Feature',
+                        properties: { isMask: true },
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: [worldBox, ring]
+                        }
+                    },
+                    {
+                        type: 'Feature',
+                        properties: { isMask: false },
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: [ring]
+                        }
+                    }
+                ];
+                src.setData({ type: 'FeatureCollection', features });
+            } else if (geojsonOrCoords.type === 'FeatureCollection') {
+                src.setData(geojsonOrCoords);
+            } else {
+                src.setData({ type: 'FeatureCollection', features: [geojsonOrCoords] });
+            }
+        };
+
+        const renderPolygonDraft = (currentCursor) => {
+            const pts = [...this.drawPoints];
+            if (currentCursor) pts.push(currentCursor);
+            if (pts.length === 0) {
+                updateSelectionGeoJSON(null);
+                return;
+            }
+
+            const features = [];
+            pts.forEach(p => {
+                features.push({
+                    type: 'Feature',
+                    properties: { isMask: false },
+                    geometry: { type: 'Point', coordinates: p }
+                });
+            });
+
+            if (pts.length >= 2) {
+                features.push({
+                    type: 'Feature',
+                    properties: { isMask: false },
+                    geometry: { type: 'LineString', coordinates: pts }
+                });
+            }
+
+            if (pts.length >= 3) {
+                const closed = [...pts, pts[0]];
+                features.push({
+                    type: 'Feature',
+                    properties: { isMask: false },
+                    geometry: { type: 'Polygon', coordinates: [closed] }
+                });
+            }
+
+            updateSelectionGeoJSON({ type: 'FeatureCollection', features });
+        };
+
+        const finishPolygon = () => {
+            if (this.drawPoints.length >= 3) {
+                const pts = this.drawPoints.map(p => ({ lat: p[1], lng: p[0] }));
+                window.App.selection = { type: 'poly', points: pts };
+                const closed = [...this.drawPoints, this.drawPoints[0]];
+                updateSelectionGeoJSON(closed);
+                exitDrawMode();
+                document.getElementById('selection-badge').classList.add('show');
+                window.App.scheduleUpdate();
+            } else {
+                exitDrawMode();
+                updateSelectionGeoJSON(null);
+            }
+        };
+
+        // Activadores de herramientas en la barra superior
+        document.getElementById('tool-rect').addEventListener('click', (e) => {
+            if (this.drawMode === 'rect') { exitDrawMode(); return; }
+            exitDrawMode();
+            this.drawMode = 'rect';
+            this.map.dragPan.disable();
+            this.map.getCanvas().style.cursor = 'crosshair';
+            e.currentTarget.classList.add('active');
+        });
+
+        document.getElementById('tool-circle').addEventListener('click', (e) => {
+            if (this.drawMode === 'circle') { exitDrawMode(); return; }
+            exitDrawMode();
+            this.drawMode = 'circle';
+            this.map.dragPan.disable();
+            this.map.getCanvas().style.cursor = 'crosshair';
+            e.currentTarget.classList.add('active');
+        });
+
+        document.getElementById('tool-poly').addEventListener('click', (e) => {
+            if (this.drawMode === 'poly') { exitDrawMode(); return; }
+            exitDrawMode();
+            this.drawMode = 'poly';
+            this.drawPoints = [];
+            this.map.doubleClickZoom.disable();
+            this.map.getCanvas().style.cursor = 'crosshair';
+            e.currentTarget.classList.add('active');
+        });
+
+        // Eventos de Mouse en el Mapa para Selección Espacial
+        this.map.on('mousedown', (e) => {
+            if (this.drawMode === 'rect' || this.drawMode === 'circle') {
+                this.drawStart = [e.lngLat.lng, e.lngLat.lat];
+            }
+        });
+
+        this.map.on('mousemove', (e) => {
+            if (this.drawMode === 'rect' && this.drawStart) {
+                const [minLng, maxLng] = [Math.min(this.drawStart[0], e.lngLat.lng), Math.max(this.drawStart[0], e.lngLat.lng)];
+                const [minLat, maxLat] = [Math.min(this.drawStart[1], e.lngLat.lat), Math.max(this.drawStart[1], e.lngLat.lat)];
+                const ring = [[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]];
+                updateSelectionGeoJSON({
+                    type: 'FeatureCollection',
+                    features: [{
+                        type: 'Feature',
+                        properties: { isMask: false },
+                        geometry: { type: 'Polygon', coordinates: [ring] }
+                    }]
+                });
+            } else if (this.drawMode === 'circle' && this.drawStart) {
+                const rDeg = Math.hypot(e.lngLat.lng - this.drawStart[0], e.lngLat.lat - this.drawStart[1]);
+                const ring = [];
+                for (let i = 0; i <= 36; i++) {
+                    const a = (i / 36) * Math.PI * 2;
+                    ring.push([this.drawStart[0] + Math.cos(a) * rDeg, this.drawStart[1] + Math.sin(a) * rDeg]);
+                }
+                updateSelectionGeoJSON({
+                    type: 'FeatureCollection',
+                    features: [{
+                        type: 'Feature',
+                        properties: { isMask: false },
+                        geometry: { type: 'Polygon', coordinates: [ring] }
+                    }]
+                });
+            } else if (this.drawMode === 'poly' && this.drawPoints.length > 0) {
+                renderPolygonDraft([e.lngLat.lng, e.lngLat.lat]);
+            }
+        });
+
+        this.map.on('click', (e) => {
+            if (this.drawMode === 'poly') {
+                if (this.drawPoints.length >= 3) {
+                    const firstPt = this.drawPoints[0];
+                    const p1 = this.map.project([firstPt[0], firstPt[1]]);
+                    const p2 = this.map.project([e.lngLat.lng, e.lngLat.lat]);
+                    if (Math.hypot(p1.x - p2.x, p1.y - p2.y) < 18) {
+                        finishPolygon();
+                        return;
                     }
                 }
-            } catch (err) {
-                console.warn("Error al ajustar cámara MapLibre:", err);
+                this.drawPoints.push([e.lngLat.lng, e.lngLat.lat]);
+                renderPolygonDraft();
             }
-        }
+        });
 
-        // Control de cámara en OSMBuildings (edificios 3D volumétricos)
-        if (this.osmb) {
-            try {
-                if (typeof this.osmb.setPitch === 'function') {
-                    this.osmb.setPitch(pitch);
-                }
-                if (typeof this.osmb.setRotation === 'function') {
-                    this.osmb.setRotation(bearing);
-                }
-            } catch (err) {
-                console.warn("Error al ajustar cámara OSMBuildings:", err);
+        this.map.on('dblclick', (e) => {
+            if (this.drawMode === 'poly') {
+                e.preventDefault();
+                finishPolygon();
             }
-        }
+        });
+
+        this.map.on('contextmenu', (e) => {
+            if (this.drawMode === 'poly') {
+                e.preventDefault();
+                finishPolygon();
+            }
+        });
+
+        this.map.on('mouseup', (e) => {
+            if (this.drawMode === 'rect' && this.drawStart) {
+                const [minLng, maxLng] = [Math.min(this.drawStart[0], e.lngLat.lng), Math.max(this.drawStart[0], e.lngLat.lng)];
+                const [minLat, maxLat] = [Math.min(this.drawStart[1], e.lngLat.lat), Math.max(this.drawStart[1], e.lngLat.lat)];
+                window.App.selection = { type: 'rect', s: minLat, n: maxLat, w: minLng, e: maxLng };
+                const ring = [[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]];
+                updateSelectionGeoJSON(ring);
+                exitDrawMode();
+                document.getElementById('selection-badge').classList.add('show');
+                window.App.scheduleUpdate();
+            } else if (this.drawMode === 'circle' && this.drawStart) {
+                const haversineMeters = (lat1, lon1, lat2, lon2) => {
+                    const R = 6371000, toRad = Math.PI / 180;
+                    const dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
+                    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) ** 2;
+                    return 2 * R * Math.asin(Math.sqrt(a));
+                };
+                const radiusMeters = haversineMeters(this.drawStart[1], this.drawStart[0], e.lngLat.lat, e.lngLat.lng);
+                window.App.selection = { type: 'circle', lat: this.drawStart[1], lng: this.drawStart[0], r: radiusMeters };
+                const rDeg = Math.hypot(e.lngLat.lng - this.drawStart[0], e.lngLat.lat - this.drawStart[1]);
+                const ring = [];
+                for (let i = 0; i <= 36; i++) {
+                    const a = (i / 36) * Math.PI * 2;
+                    ring.push([this.drawStart[0] + Math.cos(a) * rDeg, this.drawStart[1] + Math.sin(a) * rDeg]);
+                }
+                updateSelectionGeoJSON(ring);
+                exitDrawMode();
+                document.getElementById('selection-badge').classList.add('show');
+                window.App.scheduleUpdate();
+            }
+        });
+
+        // Limpiar selección espacial
+        const clearSelection = () => {
+            window.App.selection = null;
+            updateSelectionGeoJSON(null);
+            exitDrawMode();
+            document.getElementById('selection-badge').classList.remove('show');
+            window.App.scheduleUpdate();
+        };
+
+        document.getElementById('tool-clear').addEventListener('click', clearSelection);
+        document.getElementById('selection-clear-x').addEventListener('click', clearSelection);
+
+        window.addEventListener('keydown', (e) => {
+            if (this.drawMode === 'poly') {
+                if (e.key === 'Enter') finishPolygon();
+                if (e.key === 'Escape') clearSelection();
+            }
+        });
     }
 };

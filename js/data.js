@@ -156,6 +156,8 @@ const DataModule = {
      * Utiliza comprobaciones rápidas ("fast-paths") para descartar filtros inactivos.
      */
     filterData(activeFilters, selection) {
+        const sel = selection || (window.App && window.App.selection);
+
         // Verificar cuáles filtros están realmente activos (modificados por el usuario)
         const filterYear = activeFilters.yearMin !== undefined && activeFilters.yearMax !== undefined && (activeFilters.yearMin > 2016 || activeFilters.yearMax < 2026);
         const filterHour = activeFilters.hourMin !== undefined && activeFilters.hourMax !== undefined && (activeFilters.hourMin > 0 || activeFilters.hourMax < 23);
@@ -168,7 +170,7 @@ const DataModule = {
         const filterVia = activeFilters.vias && FiltersModule.fullSets && FiltersModule.fullSets.vias && activeFilters.vias.size < FiltersModule.fullSets.vias.size;
         const filterSuperf = activeFilters.superfs && FiltersModule.fullSets && FiltersModule.fullSets.superfs && activeFilters.superfs.size < FiltersModule.fullSets.superfs.size;
         const filterSexo = activeFilters.sexos && FiltersModule.fullSets && FiltersModule.fullSets.sexos && activeFilters.sexos.size < FiltersModule.fullSets.sexos.size;
-        const filterSel = Boolean(selection);
+        const filterSel = Boolean(sel && sel.type);
 
         // Si no hay ningún filtro activo, retornar la base de datos completa inmediatamente
         if (!filterYear && !filterHour && !filterWk && !filterSev && !filterVehi && !filterMuni && !filterTipo && !filterClima && !filterVia && !filterSuperf && !filterSexo && !filterSel) {
@@ -209,19 +211,19 @@ const DataModule = {
 
             // Filtro espacial dibujado en el mapa (rectángulo, círculo o polígono)
             if (filterSel) {
-                if (selection.type === 'rect') {
-                    if (item.lat < selection.s || item.lat > selection.n || item.lon < selection.w || item.lon > selection.e) return false;
-                } else if (selection.type === 'circle') {
+                if (sel.type === 'rect') {
+                    if (item.lat < sel.s || item.lat > sel.n || item.lon < sel.w || item.lon > sel.e) return false;
+                } else if (sel.type === 'circle') {
                     // Cálculo de distancia de Haversine en metros
                     const R = 6371000, toRad = Math.PI / 180;
-                    const dLat = (selection.lat - item.lat) * toRad, dLon = (selection.lng - item.lon) * toRad;
-                    const a = Math.sin(dLat / 2) ** 2 + Math.cos(item.lat * toRad) * Math.cos(selection.lat * toRad) * Math.sin(dLon / 2) ** 2;
-                    if (2 * R * Math.asin(Math.sqrt(a)) > selection.r) return false;
-                } else if (selection.type === 'poly') {
+                    const dLat = (sel.lat - item.lat) * toRad, dLon = (sel.lng - item.lon) * toRad;
+                    const a = Math.sin(dLat / 2) ** 2 + Math.cos(item.lat * toRad) * Math.cos(sel.lat * toRad) * Math.sin(dLon / 2) ** 2;
+                    if (2 * R * Math.asin(Math.sqrt(a)) > sel.r) return false;
+                } else if (sel.type === 'poly') {
                     // Algoritmo Ray-Casting para verificar si el punto está dentro del polígono
                     let inside = false;
                     const x = item.lon, y = item.lat;
-                    const poly = selection.points;
+                    const poly = sel.points;
                     for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
                         const xi = poly[i].lng, yi = poly[i].lat;
                         const xj = poly[j].lng, yj = poly[j].lat;

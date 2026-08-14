@@ -9,7 +9,8 @@
   <!-- Hojas de estilo externas (Leaflet, MarkerCluster, MapLibre GL, fuentes y diseño custom) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
   <link rel="stylesheet" href="css/style.css?v=4.5">
 </head>
@@ -29,7 +30,8 @@
       <div class="top-row">
         <div>
           <p class="eyebrow">COEPRA Michoacán · Seguridad Vial Michoacán · IMPLAN Morelia</p>
-          <h1>Accidentes viales<small>Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con georreferencia · Elaborado por Edgar Mora D.</small></h1>
+          <h1>Accidentes viales<small>Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con
+              georreferencia · Elaborado por Edgar Mora D.</small></h1>
         </div>
         <div class="top-actions">
           <button class="btn filters-toggle" id="btn-toggle-filters">☰ Filtros</button>
@@ -75,18 +77,21 @@
         </div>
 
         <div class="filter-block">
-          <div class="filter-title">Tipo de vehículo <span class="mini-link" id="vehi-all">todos</span> / <span class="mini-link" id="vehi-none">ninguno</span></div>
+          <div class="filter-title">Tipo de vehículo <span class="mini-link" id="vehi-all">todos</span> / <span
+              class="mini-link" id="vehi-none">ninguno</span></div>
           <div class="checklist" id="vehi-checklist"></div>
         </div>
 
         <div class="filter-block">
-          <div class="filter-title">Municipio <span class="mini-link" id="muni-all">todos</span> / <span class="mini-link" id="muni-none">ninguno</span></div>
+          <div class="filter-title">Municipio <span class="mini-link" id="muni-all">todos</span> / <span
+              class="mini-link" id="muni-none">ninguno</span></div>
           <input class="search-input" id="muni-search" placeholder="Buscar municipio…">
           <div class="checklist" id="muni-checklist"></div>
         </div>
 
         <div class="filter-block">
-          <div class="filter-title">Tipo de incidente <span class="mini-link" id="tipo-all">todos</span> / <span class="mini-link" id="tipo-none">ninguno</span></div>
+          <div class="filter-title">Tipo de incidente <span class="mini-link" id="tipo-all">todos</span> / <span
+              class="mini-link" id="tipo-none">ninguno</span></div>
           <div class="checklist" id="tipo-checklist"></div>
         </div>
 
@@ -122,15 +127,21 @@
               <button class="tool-btn" id="tool-circle" title="Selección radial">◎</button>
               <button class="tool-btn" id="tool-poly" title="Selección poligonal">⬡</button>
               <button class="tool-btn" id="tool-clear" title="Limpiar selección de mapa">✕</button>
-              <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación de edificios)">3D</button>
+              <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación)">3D</button>
+              <button class="tool-btn" id="tool-buildings" title="Activar / Ocultar Edificios 3D">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                  <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </button>
             </div>
             <div class="right-tools">
               <label style="font-size:11px;color:var(--niebla);font-weight:600;">Mapa</label>
               <select class="color-select" id="basemap-mode">
+                <option value="dark" selected>Oscuro</option>
                 <option value="light">Claro</option>
                 <option value="bw">Blanco y Negro</option>
                 <option value="satellite">Satélite</option>
-                <option value="dark">Oscuro</option>
               </select>
               <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:8px;">Vista</label>
               <select class="color-select" id="layer-mode">
@@ -182,7 +193,8 @@
               <span class="clock-note" id="weekday-note">Clic en barras para seleccionar</span>
             </div>
             <div class="chart-box" style="height:120px;"><canvas id="chart-weekdays"></canvas></div>
-            <div class="chart-presets-box" id="weekday-buttons-box" style="margin-top:6px; display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
+            <div class="chart-presets-box" id="weekday-buttons-box"
+              style="margin-top:6px; display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
               <span class="chip small active" data-wd="all" style="font-size:10px; padding:3px 6px;">Todos</span>
               <span class="chip small active" data-wd="1" style="font-size:10px; padding:3px 6px;">Lun</span>
               <span class="chip small active" data-wd="2" style="font-size:10px; padding:3px 6px;">Mar</span>
@@ -197,9 +209,11 @@
 
         <!-- Panel de Tendencia Mensual (Líneas 2016–2026) -->
         <div class="panel trend-panel">
-          <div class="time-chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div class="time-chart-header"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
             <h2>Tendencia mensual <span class="tag" id="trend-range-tag">2016–2026</span></h2>
-            <span class="clock-note" style="font-size:11px;" id="trend-note">Periodo: <b id="year-label" style="color:var(--ambar);">2016 – 2026</b><span id="trend-reset-box"></span></span>
+            <span class="clock-note" style="font-size:11px;" id="trend-note">Periodo: <b id="year-label"
+                style="color:var(--ambar);">2016 – 2026</b><span id="trend-reset-box"></span></span>
           </div>
           <div class="chart-box tall"><canvas id="chart-trend"></canvas></div>
           <div class="chart-slider-box" style="padding:0 6px; margin-top:4px;">
@@ -253,17 +267,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
-  <script src="https://cdn.osmbuildings.org/classic/0.2.2b/OSMBuildings-Leaflet.js"></script>
+  <script src="https://unpkg.com/supercluster@8.0.1/dist/supercluster.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- MÓDULOS DEL TABLERO -->
-  <script src="js/data.js?v=4.7"></script>
-  <script src="js/map.js?v=4.7"></script>
-  <script src="js/charts.js?v=4.7"></script>
-  <script src="js/filters.js?v=4.7"></script>
-  <script src="js/app.js?v=4.7"></script>
+  <script src="js/data.js?v=8.2"></script>
+  <script src="js/map.js?v=8.2"></script>
+  <script src="js/charts.js?v=8.2"></script>
+  <script src="js/filters.js?v=8.2"></script>
+  <script src="js/app.js?v=8.2"></script>
 
 </body>
 
