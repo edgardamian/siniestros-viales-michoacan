@@ -73,15 +73,21 @@ window.App = {
 
         // 2. Obtener y actualizar los indicadores clave (KPIs) en la cabecera
         const kpis = DataModule.getKPIs();
-        document.getElementById('hdr-count').innerText = DataModule.allData.length.toLocaleString('es-MX');
-        document.getElementById('kpi-total').innerText = kpis.total.toLocaleString('es-MX');
-        document.getElementById('kpi-fallecidos').innerText = kpis.fallecidos.toLocaleString('es-MX');
-        document.getElementById('kpi-lesionados').innerText = kpis.lesionados.toLocaleString('es-MX');
+        const hdrCount = document.getElementById('hdr-count');
+        if (hdrCount) hdrCount.innerText = DataModule.allData.length.toLocaleString('es-MX');
+        const kpiTot = document.getElementById('kpi-total');
+        if (kpiTot) kpiTot.innerText = kpis.total.toLocaleString('es-MX');
+        const kpiFat = document.getElementById('kpi-fallecidos');
+        if (kpiFat) kpiFat.innerText = kpis.fallecidos.toLocaleString('es-MX');
+        const kpiLes = document.getElementById('kpi-lesionados');
+        if (kpiLes) kpiLes.innerText = kpis.lesionados.toLocaleString('es-MX');
 
         // 3. Calcular el promedio mensual de accidentes según el rango de años seleccionado
         const totalMeses = Math.max(1, (FiltersModule.activeFilters.yearMax - FiltersModule.activeFilters.yearMin) * 12 + 12);
-        document.getElementById('kpi-promedio').textContent = Math.round(filtered.length / totalMeses).toLocaleString('es-MX');
-        document.getElementById('kpi-municipios').innerText = kpis.municipios.toLocaleString('es-MX');
+        const kpiProm = document.getElementById('kpi-promedio');
+        if (kpiProm) kpiProm.textContent = Math.round(filtered.length / totalMeses).toLocaleString('es-MX');
+        const kpiMun = document.getElementById('kpi-municipios');
+        if (kpiMun) kpiMun.innerText = kpis.municipios.toLocaleString('es-MX');
 
         // 4. Actualizar los marcadores y capas del mapa Leaflet
         if (!MapModule.map) {

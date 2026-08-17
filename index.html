@@ -25,43 +25,44 @@
 
   <div class="app">
 
-    <!-- CABECERA PRINCIPAL: Título, Crédito, Botones de Acción e Indicadores (KPIs) -->
+    <!-- CABECERA PRINCIPAL: Título, Crédito, Indicadores (KPIs) y Botones de Acción -->
     <header class="top">
       <div class="top-row">
-        <div>
+        <div class="header-brand">
           <p class="eyebrow">COEPRA Michoacán · Seguridad Vial Michoacán · IMPLAN Morelia</p>
-          <h1>Accidentes viales<small>Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con
-              georreferencia · Elaborado por Edgar Mora D.</small></h1>
+          <h1>Accidentes viales
+            <small>
+              <span class="sub-line">Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con georreferencia</span>
+              <span class="sub-line author">Elaborado por Edgar Mora D.</span>
+            </small>
+          </h1>
         </div>
+
+        <!-- Tarjetas de Indicadores Clave (4 KPIs compactos) -->
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-label">Accidentes</div>
+            <div class="kpi-value" id="kpi-total">–</div>
+          </div>
+          <div class="kpi fatal">
+            <div class="kpi-label">Fallecidos</div>
+            <div class="kpi-value" id="kpi-fallecidos">–</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Lesionados</div>
+            <div class="kpi-value" id="kpi-lesionados">–</div>
+          </div>
+          <div class="kpi ok">
+            <div class="kpi-label">Promedio mensual</div>
+            <div class="kpi-value" id="kpi-promedio">–</div>
+          </div>
+        </div>
+
         <div class="top-actions">
           <button class="btn filters-toggle" id="btn-toggle-filters">☰ Filtros</button>
           <button class="btn" id="btn-export" style="display:none;">⬇ CSV filtrado</button>
           <button class="btn" id="btn-export-img">Capturar imagen</button>
           <button class="btn primary" id="btn-reset">↺ Reiniciar filtros</button>
-        </div>
-      </div>
-
-      <!-- Tarjetas de Indicadores Clave (KPIs) -->
-      <div class="kpis">
-        <div class="kpi">
-          <div class="kpi-label">Accidentes</div>
-          <div class="kpi-value" id="kpi-total">–</div>
-        </div>
-        <div class="kpi fatal">
-          <div class="kpi-label">Fallecidos</div>
-          <div class="kpi-value" id="kpi-fallecidos">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">Lesionados</div>
-          <div class="kpi-value" id="kpi-lesionados">–</div>
-        </div>
-        <div class="kpi ok">
-          <div class="kpi-label">Promedio mensual</div>
-          <div class="kpi-value" id="kpi-promedio">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">Municipios afectados</div>
-          <div class="kpi-value" id="kpi-municipios">–</div>
         </div>
       </div>
     </header>
