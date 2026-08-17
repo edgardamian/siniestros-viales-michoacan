@@ -317,6 +317,100 @@ const DataModule = {
     },
 
     /**
+     * Agrupa de forma progresiva por mes hasta el mes activo (targetMonthKey)
+     * para dibujar la línea de tendencia dinámicamente conforme avanza el reproductor.
+     */
+    groupByMonthProgressive(targetMonthKey) {
+        const activeFilters = (typeof FiltersModule !== 'undefined' ? FiltersModule.activeFilters : {}) || {};
+        const sel = (window.App && window.App.selection);
+        const filterWk = activeFilters.weekdays && activeFilters.weekdays.size < 7;
+        const filterSev = activeFilters.severidad && activeFilters.severidad !== 'todos';
+        const filterVehi = activeFilters.vehiculos && FiltersModule.fullSets && FiltersModule.fullSets.vehiculos && activeFilters.vehiculos.size < FiltersModule.fullSets.vehiculos.size;
+        const filterMuni = activeFilters.municipios && FiltersModule.fullSets && FiltersModule.fullSets.municipios && activeFilters.municipios.size < FiltersModule.fullSets.municipios.size;
+        const filterTipo = activeFilters.tipos && FiltersModule.fullSets && FiltersModule.fullSets.tipos && activeFilters.tipos.size < FiltersModule.fullSets.tipos.size;
+        const filterClima = activeFilters.climas && FiltersModule.fullSets && FiltersModule.fullSets.climas && activeFilters.climas.size < FiltersModule.fullSets.climas.size;
+        const filterVia = activeFilters.vias && FiltersModule.fullSets && FiltersModule.fullSets.vias && activeFilters.vias.size < FiltersModule.fullSets.vias.size;
+        const filterSuperf = activeFilters.superfs && FiltersModule.fullSets && FiltersModule.fullSets.superfs && activeFilters.superfs.size < FiltersModule.fullSets.superfs.size;
+        const filterSexo = activeFilters.sexos && FiltersModule.fullSets && FiltersModule.fullSets.sexos && activeFilters.sexos.size < FiltersModule.fullSets.sexos.size;
+        const filterSel = Boolean(sel && sel.type);
+
+        const byMonth = new Map();
+        const fatalByMonth = new Map();
+        const allMonths = new Set();
+        const len = this.allData.length;
+
+        for (let i = 0; i < len; i++) {
+            const item = this.allData[i];
+            if (!item.monthKey) continue;
+            allMonths.add(item.monthKey);
+
+            if (filterWk && !activeFilters.weekdays.has(item.wkIdx)) continue;
+            if (filterSev) {
+                if (activeFilters.severidad === 'danos' && item.sevVal !== 0) continue;
+                if (activeFilters.severidad === 'heridos' && item.sevVal !== 1) continue;
+                if (activeFilters.severidad === 'fatal' && item.sevVal !== 2) continue;
+            }
+            if (filterVehi) {
+                let hasV = false;
+                if (item.vehiculos) {
+                    for (let j = 0; j < item.vehiculos.length; j++) {
+                        if (activeFilters.vehiculos.has(item.vehiculos[j])) { hasV = true; break; }
+                    }
+                }
+                if (!hasV) continue;
+            }
+            if (filterMuni && !activeFilters.municipios.has(item.muniStr)) continue;
+            if (filterTipo && !activeFilters.tipos.has(item.tipoStr)) continue;
+            if (filterClima && !activeFilters.climas.has(item.climaStr)) continue;
+            if (filterVia && !activeFilters.vias.has(item.viaStr)) continue;
+            if (filterSuperf && !activeFilters.superfs.has(item.superfStr)) continue;
+            if (filterSexo && !activeFilters.sexos.has(item.sexoStr)) continue;
+            if (filterSel) {
+                if (sel.type === 'rect' && (item.lat < sel.s || item.lat > sel.n || item.lon < sel.w || item.lon > sel.e)) continue;
+            }
+
+            const key = item.monthKey;
+            if (item.sevVal !== 2) {
+                byMonth.set(key, (byMonth.get(key) || 0) + 1);
+            }
+            if (item.sevVal === 2) {
+                const fCount = (item.numero_personas_fallecidas && item.numero_personas_fallecidas > 0) ? item.numero_personas_fallecidas : 1;
+                fatalByMonth.set(key, (fatalByMonth.get(key) || 0) + fCount);
+            }
+        }
+
+        const keys = Array.from(allMonths).sort((a, b) => a - b);
+        const labels = keys.map(k => {
+            const y = Math.floor(k / 100);
+            const m = k % 100;
+            return String(m).padStart(2, '0') + '/' + String(y).slice(2);
+        });
+
+        let activeIdx = -1;
+        const totals = keys.map((k, idx) => {
+            if (k <= targetMonthKey) {
+                activeIdx = idx;
+                return byMonth.get(k) || 0;
+            }
+            return null;
+        });
+
+        const fatals = keys.map(k => {
+            if (k <= targetMonthKey) {
+                return fatalByMonth.get(k) || 0;
+            }
+            return null;
+        });
+
+        return {
+            labels: labels,
+            totals: totals,
+            fatals: fatals,
+            activeIdx: activeIdx
+        };
+    },
+
+    /**
      * Obtiene el conteo de tipos de vehículo para la gráfica de barras.
      */
     getTopVehiculos() {

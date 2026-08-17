@@ -170,13 +170,32 @@ const ChartsModule = {
         }
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        const chartData = dataMod.groupByMonthAndFatalities();
-        const isMonthAnimation = (window.PlayerModule && window.PlayerModule.isPlaying && window.PlayerModule.mode === 'month');
+        const targetMonthKey = (FiltersModule.activeFilters ? FiltersModule.activeFilters.targetMonthKey : null);
+        const isMonthAnimation = (window.PlayerModule && window.PlayerModule.isPlaying && window.PlayerModule.mode === 'month') || (targetMonthKey !== undefined && targetMonthKey !== null);
+
+        let chartData;
+        if (isMonthAnimation && dataMod.groupByMonthProgressive) {
+            chartData = dataMod.groupByMonthProgressive(targetMonthKey);
+        } else {
+            chartData = dataMod.groupByMonthAndFatalities();
+        }
+
+        const activeIdx = (chartData.activeIdx !== undefined ? chartData.activeIdx : -1);
+        const pointRadiusTot = isMonthAnimation
+            ? (ctx) => (ctx.dataIndex === activeIdx ? 6 : 0)
+            : 0;
+        const pointRadiusFat = isMonthAnimation
+            ? (ctx) => (ctx.dataIndex === activeIdx ? 5 : 0)
+            : 0;
 
         if (this.trendChartInst) {
             this.trendChartInst.data.labels = chartData.labels;
             this.trendChartInst.data.datasets[0].data = chartData.totals;
+            this.trendChartInst.data.datasets[0].pointRadius = pointRadiusTot;
+            this.trendChartInst.data.datasets[0].pointBackgroundColor = '#ffd600';
             this.trendChartInst.data.datasets[1].data = chartData.fatals;
+            this.trendChartInst.data.datasets[1].pointRadius = pointRadiusFat;
+            this.trendChartInst.data.datasets[1].pointBackgroundColor = '#ff1744';
 
             if (isMonthAnimation) {
                 this.trendChartInst.options.scales.y.max = this.baseTrendTotalMax;
@@ -203,8 +222,10 @@ const ChartsModule = {
                         backgroundColor: 'rgba(255,214,0,.14)',
                         fill: true,
                         tension: 0.25,
-                        pointRadius: 0,
-                        borderWidth: 2
+                        pointRadius: pointRadiusTot,
+                        pointBackgroundColor: '#ffd600',
+                        borderWidth: 2,
+                        spanGaps: false
                     },
                     {
                         label: 'Defunciones',
@@ -213,9 +234,11 @@ const ChartsModule = {
                         backgroundColor: 'transparent',
                         fill: false,
                         tension: 0.25,
-                        pointRadius: 0,
+                        pointRadius: pointRadiusFat,
+                        pointBackgroundColor: '#ff1744',
                         borderWidth: 2,
-                        yAxisID: 'y2'
+                        yAxisID: 'y2',
+                        spanGaps: false
                     }
                 ]
             },
@@ -231,6 +254,7 @@ const ChartsModule = {
                         display: true,
                         position: 'left',
                         beginAtZero: true,
+                        max: isMonthAnimation ? this.baseTrendTotalMax : undefined,
                         grid: { color: '#1b2331' },
                         title: { display: true, text: 'Accidentes Totales', color: '#ffd600', font: { size: 10, weight: '500' } },
                         ticks: { color: '#94a3b8' }
@@ -240,6 +264,7 @@ const ChartsModule = {
                         display: true,
                         position: 'right',
                         beginAtZero: true,
+                        max: isMonthAnimation ? this.baseTrendFatalMax : undefined,
                         grid: { display: false },
                         title: { display: true, text: 'Defunciones', color: '#ff1744', font: { size: 10, weight: '500' } },
                         ticks: { color: '#ff1744' }
