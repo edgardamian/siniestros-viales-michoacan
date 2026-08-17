@@ -134,6 +134,33 @@
                   <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
               </button>
+
+              <!-- Control de Opacidad / Transparencia -->
+              <div class="opacity-control-wrap" id="opacity-control-wrap">
+                <button class="tool-btn" id="tool-opacity" title="Ajustar transparencia de capas">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>
+                  </svg>
+                </button>
+                <div class="opacity-popover" id="opacity-popover">
+                  <div class="opacity-header">
+                    <span>Opacidad</span>
+                    <b id="opacity-val-text">85%</b>
+                  </div>
+                  <input type="range" id="layer-opacity-slider" min="15" max="100" value="85" step="5">
+                </div>
+              </div>
+
+              <!-- Botón Pantalla Completa -->
+              <button class="tool-btn" id="tool-fullscreen" title="Pantalla completa">
+                <svg id="fs-icon-expand" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+                <svg id="fs-icon-compress" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none; display:none;">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                </svg>
+              </button>
             </div>
             <div class="right-tools">
               <label style="font-size:11px;color:var(--niebla);font-weight:600;">Mapa</label>
@@ -272,11 +299,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- MÓDULOS DEL TABLERO -->
-  <script src="js/data.js?v=9.0"></script>
-  <script src="js/map.js?v=9.0"></script>
-  <script src="js/charts.js?v=9.0"></script>
-  <script src="js/filters.js?v=9.0"></script>
-  <script src="js/app.js?v=9.0"></script>
+  <script src="js/data.js?v=9.5"></script>
+  <script src="js/map.js?v=9.5"></script>
+  <script src="js/charts.js?v=9.5"></script>
+  <script src="js/filters.js?v=9.5"></script>
+  <script src="js/app.js?v=9.5"></script>
 
 </body>
 

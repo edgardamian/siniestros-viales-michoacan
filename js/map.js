@@ -11,6 +11,8 @@ const MapModule = {
     map: null,
     is3D: false,
     showBuildings: false,
+    isFullscreen: false,
+    layerOpacity: 0.85,
     pitch: 0,
     bearing: 0,
     currentPopup: null,
@@ -215,7 +217,7 @@ const MapModule = {
                             16, 38,
                             18, 50
                         ],
-                        'heatmap-opacity': 0.85
+                        'heatmap-opacity': this.layerOpacity
                     }
                 };
 
@@ -621,6 +623,56 @@ const MapModule = {
     },
 
     /**
+     * Alterna la vista de pantalla completa para el mapa
+     */
+    toggleFullscreen(enable) {
+        this.isFullscreen = (enable !== undefined) ? enable : !this.isFullscreen;
+        const panel = document.querySelector('.map-panel');
+        const expandIcon = document.getElementById('fs-icon-expand');
+        const compressIcon = document.getElementById('fs-icon-compress');
+        const btnFs = document.getElementById('tool-fullscreen');
+
+        if (panel) {
+            panel.classList.toggle('is-fullscreen', this.isFullscreen);
+        }
+        if (btnFs) {
+            btnFs.classList.toggle('active', this.isFullscreen);
+        }
+        if (expandIcon && compressIcon) {
+            expandIcon.style.display = this.isFullscreen ? 'none' : 'block';
+            compressIcon.style.display = this.isFullscreen ? 'block' : 'none';
+        }
+
+        // Redimensionar el motor MapLibre GL
+        setTimeout(() => {
+            if (this.map) this.map.resize();
+        }, 50);
+        setTimeout(() => {
+            if (this.map) this.map.resize();
+        }, 300);
+    },
+
+    /**
+     * Ajusta la opacidad / transparencia de la capa de calor y los puntos
+     */
+    setOpacity(val) {
+        this.layerOpacity = Math.max(0.1, Math.min(1.0, val));
+        if (this.map && this.map.getLayer('accidents-heat-layer')) {
+            try {
+                this.map.setPaintProperty('accidents-heat-layer', 'heatmap-opacity', this.layerOpacity);
+            } catch (e) { }
+        }
+        const mapEl = document.getElementById('map');
+        if (mapEl) {
+            mapEl.style.setProperty('--markers-opacity', this.layerOpacity);
+        }
+        const txt = document.getElementById('opacity-val-text');
+        if (txt) {
+            txt.textContent = `${Math.round(this.layerOpacity * 100)}%`;
+        }
+    },
+
+    /**
      * Conecta todos los eventos de interfaz del mapa (selectores, herramientas de dibujo, botones)
      */
     bindEvents() {
@@ -655,6 +707,47 @@ const MapModule = {
         if (btnBld) {
             btnBld.addEventListener('click', () => {
                 this.toggleBuildings();
+            });
+        }
+
+        // Botón Pantalla Completa
+        const btnFs = document.getElementById('tool-fullscreen');
+        if (btnFs) {
+            btnFs.addEventListener('click', () => {
+                this.toggleFullscreen();
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isFullscreen) {
+                this.toggleFullscreen(false);
+            }
+        });
+
+        // Control y Popover de Opacidad
+        const btnOp = document.getElementById('tool-opacity');
+        const popoverOp = document.getElementById('opacity-popover');
+        const sliderOp = document.getElementById('layer-opacity-slider');
+
+        if (btnOp && popoverOp) {
+            btnOp.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popoverOp.classList.toggle('show');
+                btnOp.classList.toggle('active', popoverOp.classList.contains('show'));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!popoverOp.contains(e.target) && e.target !== btnOp) {
+                    popoverOp.classList.remove('show');
+                    btnOp.classList.remove('active');
+                }
+            });
+        }
+
+        if (sliderOp) {
+            sliderOp.addEventListener('input', (e) => {
+                const v = parseFloat(e.target.value) / 100;
+                this.setOpacity(v);
             });
         }
 

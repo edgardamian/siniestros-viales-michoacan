@@ -274,6 +274,74 @@ main.layout {
 
 #map { height: 520px; width: 100%; background: #0b0e14; position: relative; }
 
+/* ---------- CONTROL DE OPACIDAD POPOVER ---------- */
+.opacity-control-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.opacity-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--concreto);
+  border: 1px solid var(--linea-clara);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  width: 175px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opacity-popover.show {
+  display: flex;
+}
+
+.opacity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--niebla);
+  font-weight: 600;
+}
+
+.opacity-header b {
+  color: var(--senial-amarillo);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+}
+
+.opacity-popover input[type=range] {
+  width: 100%;
+  accent-color: var(--cono-naranja);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* ---------- MODO PANTALLA COMPLETA ---------- */
+.map-panel.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.map-panel.is-fullscreen #map {
+  height: calc(100vh - 54px) !important;
+  flex: 1;
+}
+
 .selection-badge {
   display: none; align-items: center; gap: 8px; background: rgba(255, 106, 0, 0.15); border: 1px solid var(--cono-naranja); color: var(--senial-amarillo-brillante);
   padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 20px; margin: 0 14px 10px;
