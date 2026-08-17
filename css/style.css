@@ -239,11 +239,108 @@ main.layout {
 .checklist::-webkit-scrollbar { width: 6px; }
 .checklist::-webkit-scrollbar-thumb { background: var(--linea); border-radius: 4px; }
 
-.check-row { display: flex; align-items: center; gap: 7px; padding: 4px 4px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-.check-row:hover { background: var(--panel-2); }
-.check-row input { accent-color: var(--cono-naranja); cursor: pointer; }
-.check-row .cnt { margin-left: auto; color: var(--niebla-2); font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; }
-.check-row.hidden { display: none; }
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--hueso);
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.check-row:hover {
+  background: var(--panel-2);
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.check-label span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.check-row input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid var(--linea-clara);
+  border-radius: 3px;
+  background: var(--asfalto);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: all 0.15s ease-in-out;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.check-row input[type="checkbox"]:hover {
+  border-color: var(--cono-naranja);
+}
+
+.check-row input[type="checkbox"]:checked {
+  background: var(--cono-naranja);
+  border-color: var(--cono-naranja);
+}
+
+.check-row input[type="checkbox"]:checked::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: #0b0e14;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.check-row .cnt {
+  margin-left: auto;
+  color: var(--niebla-2);
+  font-size: 10.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 5px;
+  border-radius: 10px;
+}
+
+.btn-zoom-muni {
+  background: var(--panel-2);
+  border: 1px solid var(--linea);
+  color: var(--niebla);
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 5px;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.btn-zoom-muni:hover {
+  background: var(--cono-naranja);
+  border-color: var(--cono-naranja);
+  color: #0b0e14;
+  transform: scale(1.15);
+}
+
+.check-row.hidden {
+  display: none;
+}
 
 .reset-filters { width: 100%; margin-top: 4px; }
 
@@ -342,6 +439,58 @@ main.layout {
   flex: 1;
 }
 
+/* ---------- GUÍA FLOTANTE DE DIBUJO ESPACIAL ---------- */
+.draw-hint {
+  display: none;
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(19, 25, 35, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--cono-naranja);
+  color: var(--hueso);
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  align-items: center;
+  gap: 8px;
+  max-width: 90%;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.draw-hint.show {
+  display: inline-flex;
+}
+
+.draw-hint button {
+  background: var(--panel-2);
+  border: 1px solid var(--linea-clara);
+  color: var(--hueso);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.draw-hint button#draw-finish-btn {
+  background: var(--cono-naranja);
+  border-color: var(--cono-naranja);
+  color: #0b0e14;
+  font-weight: 700;
+}
+
+.draw-hint button#draw-cancel-btn:hover {
+  border-color: var(--senial-rojo);
+  color: var(--senial-rojo);
+}
+
 .selection-badge {
   display: none; align-items: center; gap: 8px; background: rgba(255, 106, 0, 0.15); border: 1px solid var(--cono-naranja); color: var(--senial-amarillo-brillante);
   padding: 6px 10px; font-size: 11.5px; font-weight: 600; border-radius: 20px; margin: 0 14px 10px;
@@ -368,6 +517,196 @@ main.layout {
 @keyframes pulse-border {
   0%, 100% { border-color: var(--linea); }
   50% { border-color: var(--cono-naranja); box-shadow: 0 0 12px rgba(255, 106, 0, 0.5); }
+}
+
+/* ---------- BARRA DE REPRODUCCIÓN TEMPORAL (TIME-LAPSE) ---------- */
+.time-player-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 14px;
+  background: var(--concreto);
+  border: 1px solid var(--linea);
+  border-radius: var(--radius-md);
+  box-shadow: var(--sombra-panel);
+  flex-wrap: wrap;
+}
+
+.tp-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tp-play-btn {
+  background: var(--cono-naranja);
+  color: #0b0e14;
+  border: none;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(255, 106, 0, 0.35);
+}
+
+.tp-play-btn:hover {
+  background: var(--cono-naranja-brillante);
+  transform: scale(1.03);
+}
+
+.tp-play-btn.playing {
+  background: var(--senial-amarillo-brillante);
+  color: #0b0e14;
+  box-shadow: 0 0 10px rgba(255, 230, 0, 0.4);
+}
+
+.tp-btn-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--linea);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.tp-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--hueso);
+  padding: 4px 7px;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.tp-icon-btn:hover {
+  background: var(--linea);
+  color: var(--senial-amarillo);
+}
+
+.tp-icon-btn + .tp-icon-btn {
+  border-left: 1px solid var(--linea);
+}
+
+.tp-mode-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--asfalto);
+  border: 1px solid var(--linea);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.tp-mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--niebla);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.tp-mode-btn:hover {
+  color: var(--hueso);
+}
+
+.tp-mode-btn.active {
+  background: var(--panel-2);
+  color: var(--senial-amarillo);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.tp-center {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tp-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+}
+
+.tp-current-label {
+  font-weight: 700;
+  color: var(--senial-amarillo);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.2px;
+}
+
+.tp-count-badge {
+  font-size: 10px;
+  color: var(--niebla-2);
+  font-family: 'IBM Plex Mono', monospace;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+
+.tp-scrubber {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--panel-2);
+  height: 5px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.tp-scrubber::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--cono-naranja);
+  border: 1.5px solid #0b0e14;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255, 106, 0, 0.8);
+  transition: transform 0.1s ease;
+}
+
+.tp-scrubber::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.tp-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tp-speed-label {
+  font-size: 10.5px;
+  color: var(--niebla);
+  font-weight: 600;
+}
+
+.tp-speed-select {
+  background: var(--panel-2);
+  color: var(--hueso);
+  border: 1px solid var(--linea);
+  font-size: 10px;
+  padding: 3px 5px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
 }
 
 /* ---------- PANEL HORARIO Y DÍA DE LA SEMANA ---------- */
@@ -469,6 +808,13 @@ footer a { color: var(--niebla); }
 }
 .maplibregl-ctrl-icon {
   filter: invert(0.85) !important;
+}
+
+.maplibregl-marker,
+.point-marker-wrap,
+.cluster-icon {
+  opacity: var(--markers-opacity, 1);
+  transition: opacity 0.15s ease;
 }
 
 .cluster-icon {

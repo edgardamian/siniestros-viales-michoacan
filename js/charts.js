@@ -345,19 +345,23 @@ const ChartsModule = {
                             }
                         }
                     },
-                    // Al hacer clic en una barra se selecciona esa hora en particular
+                    // Al hacer clic en una barra se selecciona esa hora o se restablecen todas si ya estaba seleccionada
                     onClick: (e, activeElements) => {
                         if (activeElements.length > 0) {
                             const h = activeElements[0].index;
                             const minEl = document.getElementById('hour-min');
                             const maxEl = document.getElementById('hour-max');
+                            const curMin = (FiltersModule.activeFilters && FiltersModule.activeFilters.hourMin !== undefined) ? FiltersModule.activeFilters.hourMin : 0;
+                            const curMax = (FiltersModule.activeFilters && FiltersModule.activeFilters.hourMax !== undefined) ? FiltersModule.activeFilters.hourMax : 23;
 
-                            if (hMin === h && hMax === h) {
+                            if (curMin === h && curMax === h) {
+                                // Si ya estaba seleccionada exactamente esta hora, restablecer todas las horas (0 a 23)
                                 if (minEl && maxEl) {
                                     minEl.value = 0; maxEl.value = 23;
                                     minEl.dispatchEvent(new Event('input'));
                                 }
                             } else {
+                                // Seleccionar únicamente esta hora
                                 if (minEl && maxEl) {
                                     minEl.value = h; maxEl.value = h;
                                     minEl.dispatchEvent(new Event('input'));
@@ -506,3 +510,5 @@ const ChartsModule = {
         }
     }
 };
+
+window.ChartsModule = ChartsModule;

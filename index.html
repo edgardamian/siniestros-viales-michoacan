@@ -12,7 +12,7 @@
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
-  <link rel="stylesheet" href="css/style.css?v=4.5">
+  <link rel="stylesheet" href="css/style.css?v=9.6">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
   <!-- PANTALLA DE CARGA (SPINNER) -->
   <div id="loading">
     <div class="spinner"></div>
-    <p id="loading-text">Cargando 58,500 accidentes...</p>
+    <p id="loading-text">Cargando 58,501 accidentes...</p>
   </div>
 
   <div class="app">
@@ -129,18 +129,20 @@
               <button class="tool-btn" id="tool-clear" title="Limpiar selección de mapa">✕</button>
               <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación)">3D</button>
               <button class="tool-btn" id="tool-buildings" title="Activar / Ocultar Edificios 3D">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                  <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                  <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
               </button>
 
               <!-- Control de Opacidad / Transparencia -->
               <div class="opacity-control-wrap" id="opacity-control-wrap">
                 <button class="tool-btn" id="tool-opacity" title="Ajustar transparencia de capas">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
                   </svg>
                 </button>
                 <div class="opacity-popover" id="opacity-popover">
@@ -154,11 +156,16 @@
 
               <!-- Botón Pantalla Completa -->
               <button class="tool-btn" id="tool-fullscreen" title="Pantalla completa">
-                <svg id="fs-icon-expand" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                <svg id="fs-icon-expand" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                  <path
+                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                 </svg>
-                <svg id="fs-icon-compress" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none; display:none;">
-                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+                <svg id="fs-icon-compress" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                  style="pointer-events:none; display:none;">
+                  <path
+                    d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                 </svg>
               </button>
             </div>
@@ -184,11 +191,55 @@
             </div>
           </div>
           <div id="map"></div>
+          <div class="draw-hint" id="draw-hint">
+            <span id="draw-hint-text">Toca el mapa para comenzar a dibujar</span>
+            <button id="draw-finish-btn" style="display:none;">✓ Terminar</button>
+            <button id="draw-cancel-btn">✕ Cancelar</button>
+          </div>
           <div class="selection-badge" id="selection-badge">
             <span id="selection-text">Filtro espacial activo</span>
             <button id="selection-clear-x">✕</button>
           </div>
           <div class="map-legend" id="map-legend"></div>
+        </div>
+
+        <!-- Barra de Reproducción Temporal (Time-Lapse Player) -->
+        <div class="panel time-player-panel" id="time-player-panel">
+          <div class="tp-left">
+            <button type="button" class="tp-btn tp-play-btn" id="tp-play-btn" title="Reproducir animación en lapso de tiempo">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <span>Reproducir</span>
+            </button>
+            <div class="tp-btn-group">
+              <button type="button" class="tp-icon-btn" id="tp-prev-btn" title="Paso anterior">◀</button>
+              <button type="button" class="tp-icon-btn" id="tp-next-btn" title="Siguiente paso">▶</button>
+              <button type="button" class="tp-icon-btn" id="tp-reset-btn" title="Restablecer todos los datos">↺</button>
+            </div>
+            <div class="tp-mode-group">
+              <button type="button" class="tp-mode-btn active" data-mode="hour">⏰ Horas</button>
+              <button type="button" class="tp-mode-btn" data-mode="weekday">📅 Días</button>
+              <button type="button" class="tp-mode-btn" data-mode="month">📈 Meses</button>
+            </div>
+          </div>
+
+          <div class="tp-center">
+            <div class="tp-status-row">
+              <span class="tp-current-label" id="tp-current-label">⏰ 00:00 h</span>
+              <span class="tp-count-badge" id="tp-count-badge">58,503 acc.</span>
+            </div>
+            <input type="range" class="tp-scrubber" id="tp-scrubber" min="0" max="23" value="0" step="1">
+          </div>
+
+          <div class="tp-right">
+            <label class="tp-speed-label">Velocidad:</label>
+            <select class="tp-speed-select" id="tp-speed-select">
+              <option value="0.5">0.5x</option>
+              <option value="1" selected>1.0x</option>
+              <option value="2">2.0x</option>
+            </select>
+          </div>
         </div>
 
         <!-- Panel Doble: Accidentes por Hora y Día de la Semana -->
@@ -299,11 +350,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- MÓDULOS DEL TABLERO -->
-  <script src="js/data.js?v=9.5"></script>
-  <script src="js/map.js?v=9.5"></script>
-  <script src="js/charts.js?v=9.5"></script>
-  <script src="js/filters.js?v=9.5"></script>
-  <script src="js/app.js?v=9.5"></script>
+  <script src="js/data.js?v=9.8"></script>
+  <script src="js/map.js?v=9.8"></script>
+  <script src="js/charts.js?v=9.8"></script>
+  <script src="js/filters.js?v=9.8"></script>
+  <script src="js/player.js?v=9.8"></script>
+  <script src="js/app.js?v=9.8"></script>
 
 </body>
 

@@ -51,6 +51,11 @@ const MapModule = {
         const initialBasemap = (document.getElementById('basemap-mode') && document.getElementById('basemap-mode').value) || 'dark';
         const styleUrl = this.baseStyles[initialBasemap] || this.baseStyles.dark;
 
+        const mapEl = document.getElementById('map');
+        if (mapEl) {
+            mapEl.style.setProperty('--markers-opacity', this.layerOpacity);
+        }
+
         // Crear mapa WebGL centrado en Morelia, Michoacán
         this.map = new maplibregl.Map({
             container: 'map',
@@ -673,6 +678,62 @@ const MapModule = {
     },
 
     /**
+     * Centra y ajusta la cámara del mapa a la extensión geográfica de los accidentes de un municipio
+     */
+    flyToMunicipality(municipio) {
+        if (!this.map || !municipio) return;
+        const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        const target = norm(municipio);
+
+        const dataMod = (typeof DataModule !== 'undefined' ? DataModule : (window.DataModule || {}));
+
+        // 1. Buscar en el diccionario precalculado de límites por municipio
+        let b = (dataMod && dataMod.muniBounds) ? dataMod.muniBounds[target] : null;
+
+        // 2. Si no se encontró en el precalculado, buscar en tiempo real en allData
+        if (!b && dataMod && dataMod.allData) {
+            let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity, count = 0;
+            const data = dataMod.allData;
+            for (let i = 0; i < data.length; i++) {
+                const d = data[i];
+                if (norm(d.municipio) === target) {
+                    const lng = +d.lon;
+                    const lat = +d.lat;
+                    if (!isNaN(lng) && !isNaN(lat)) {
+                        if (lng < minLng) minLng = lng;
+                        if (lng > maxLng) maxLng = lng;
+                        if (lat < minLat) minLat = lat;
+                        if (lat > maxLat) maxLat = lat;
+                        count++;
+                    }
+                }
+            }
+            if (count > 0) {
+                b = { minLng, maxLng, minLat, maxLat, count };
+            }
+        }
+
+        if (!b) {
+            console.warn(`No se encontraron coordenadas para el municipio: ${municipio}`);
+            return;
+        }
+
+        if (b.minLng === b.maxLng && b.minLat === b.maxLat) {
+            this.map.flyTo({
+                center: [b.minLng, b.minLat],
+                zoom: 14,
+                duration: 1000
+            });
+        } else {
+            this.map.fitBounds([[b.minLng, b.minLat], [b.maxLng, b.maxLat]], {
+                padding: { top: 60, bottom: 60, left: 60, right: 60 },
+                maxZoom: 15,
+                duration: 1000
+            });
+        }
+    },
+
+    /**
      * Conecta todos los eventos de interfaz del mapa (selectores, herramientas de dibujo, botones)
      */
     bindEvents() {
@@ -751,17 +812,49 @@ const MapModule = {
             });
         }
 
-        // --- Herramientas de Dibujo Espacial (Rectángulo, Círculo, Polígono) ---
+        // --- Herramientas de Dibujo Espacial (Rectángulo, Círculo, Polígono - Táctil y Mouse) ---
+        const hintEl = document.getElementById('draw-hint');
+        const hintTextEl = document.getElementById('draw-hint-text');
+        const finishBtnEl = document.getElementById('draw-finish-btn');
+        const cancelBtnEl = document.getElementById('draw-cancel-btn');
+
+        const showHint = (text, showFinish = false) => {
+            if (hintEl && hintTextEl) {
+                hintTextEl.textContent = text;
+                if (finishBtnEl) finishBtnEl.style.display = showFinish ? 'inline-block' : 'none';
+                hintEl.classList.add('show');
+            }
+        };
+
+        const hideHint = () => {
+            if (hintEl) hintEl.classList.remove('show');
+        };
+
         const exitDrawMode = () => {
             this.drawMode = null;
             this.drawPoints = [];
             this.drawStart = null;
-            this.map.dragPan.enable();
-            this.map.doubleClickZoom.enable();
-            this.map.getCanvas().style.cursor = '';
-            document.getElementById('tool-rect').classList.remove('active');
-            document.getElementById('tool-circle').classList.remove('active');
-            document.getElementById('tool-poly').classList.remove('active');
+            this.startScreenPos = null;
+            this.isDraggingShape = false;
+
+            if (this.map) {
+                this.map.dragPan.enable();
+                this.map.touchZoomRotate.enable();
+                this.map.doubleClickZoom.enable();
+                const canvas = this.map.getCanvas();
+                if (canvas) {
+                    canvas.style.cursor = '';
+                    canvas.style.touchAction = '';
+                }
+            }
+
+            hideHint();
+            const btnR = document.getElementById('tool-rect');
+            const btnC = document.getElementById('tool-circle');
+            const btnP = document.getElementById('tool-poly');
+            if (btnR) btnR.classList.remove('active');
+            if (btnC) btnC.classList.remove('active');
+            if (btnP) btnP.classList.remove('active');
         };
 
         const updateSelectionGeoJSON = (geojsonOrCoords) => {
@@ -772,7 +865,6 @@ const MapModule = {
                 return;
             }
 
-            // Si se pasa un arreglo de coordenadas del anillo cerrado
             if (Array.isArray(geojsonOrCoords)) {
                 const ring = geojsonOrCoords;
                 const worldBox = [[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]];
@@ -800,6 +892,39 @@ const MapModule = {
             } else {
                 src.setData({ type: 'FeatureCollection', features: [geojsonOrCoords] });
             }
+        };
+
+        const finishRect = (p1, p2) => {
+            const [minLng, maxLng] = [Math.min(p1[0], p2[0]), Math.max(p1[0], p2[0])];
+            const [minLat, maxLat] = [Math.min(p1[1], p2[1]), Math.max(p1[1], p2[1])];
+            window.App.selection = { type: 'rect', s: minLat, n: maxLat, w: minLng, e: maxLng };
+            const ring = [[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]];
+            updateSelectionGeoJSON(ring);
+            exitDrawMode();
+            document.getElementById('selection-badge').classList.add('show');
+            window.App.scheduleUpdate();
+        };
+
+        const haversineMeters = (lat1, lon1, lat2, lon2) => {
+            const R = 6371000, toRad = Math.PI / 180;
+            const dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) ** 2;
+            return 2 * R * Math.asin(Math.sqrt(a));
+        };
+
+        const finishCircle = (center, edge) => {
+            const radiusMeters = haversineMeters(center[1], center[0], edge[1], edge[0]);
+            window.App.selection = { type: 'circle', lat: center[1], lng: center[0], r: radiusMeters };
+            const rDeg = Math.hypot(edge[0] - center[0], edge[1] - center[1]);
+            const ring = [];
+            for (let i = 0; i <= 36; i++) {
+                const a = (i / 36) * Math.PI * 2;
+                ring.push([center[0] + Math.cos(a) * rDeg, center[1] + Math.sin(a) * rDeg]);
+            }
+            updateSelectionGeoJSON(ring);
+            exitDrawMode();
+            document.getElementById('selection-badge').classList.add('show');
+            window.App.scheduleUpdate();
         };
 
         const renderPolygonDraft = (currentCursor) => {
@@ -855,38 +980,60 @@ const MapModule = {
         };
 
         // Activadores de herramientas en la barra superior
-        document.getElementById('tool-rect').addEventListener('click', (e) => {
-            if (this.drawMode === 'rect') { exitDrawMode(); return; }
+        const startDrawMode = (mode) => {
+            if (this.drawMode === mode) { exitDrawMode(); return; }
             exitDrawMode();
-            this.drawMode = 'rect';
-            this.map.dragPan.disable();
-            this.map.getCanvas().style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
-
-        document.getElementById('tool-circle').addEventListener('click', (e) => {
-            if (this.drawMode === 'circle') { exitDrawMode(); return; }
-            exitDrawMode();
-            this.drawMode = 'circle';
-            this.map.dragPan.disable();
-            this.map.getCanvas().style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
-
-        document.getElementById('tool-poly').addEventListener('click', (e) => {
-            if (this.drawMode === 'poly') { exitDrawMode(); return; }
-            exitDrawMode();
-            this.drawMode = 'poly';
+            this.drawMode = mode;
             this.drawPoints = [];
+            this.drawStart = null;
+            this.map.dragPan.disable();
+            this.map.touchZoomRotate.disable();
             this.map.doubleClickZoom.disable();
-            this.map.getCanvas().style.cursor = 'crosshair';
-            e.currentTarget.classList.add('active');
-        });
 
-        // Eventos de Mouse en el Mapa para Selección Espacial
+            const canvas = this.map.getCanvas();
+            if (canvas) {
+                canvas.style.cursor = 'crosshair';
+                canvas.style.touchAction = 'none';
+            }
+
+            if (mode === 'rect') {
+                document.getElementById('tool-rect').classList.add('active');
+                showHint('Toca 2 puntos opuestos (o arrastra con el ratón)');
+            } else if (mode === 'circle') {
+                document.getElementById('tool-circle').classList.add('active');
+                showHint('Toca el centro y luego la distancia (o arrastra con el ratón)');
+            } else if (mode === 'poly') {
+                document.getElementById('tool-poly').classList.add('active');
+                showHint('Toca los vértices. Mínimo 3 puntos para cerrar.', false);
+            }
+        };
+
+        document.getElementById('tool-rect').addEventListener('click', () => startDrawMode('rect'));
+        document.getElementById('tool-circle').addEventListener('click', () => startDrawMode('circle'));
+        document.getElementById('tool-poly').addEventListener('click', () => startDrawMode('poly'));
+
+        if (finishBtnEl) {
+            finishBtnEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.drawMode === 'poly') finishPolygon();
+            });
+        }
+        if (cancelBtnEl) {
+            cancelBtnEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                exitDrawMode();
+                updateSelectionGeoJSON(null);
+            });
+        }
+
+        // --- Eventos en el Mapa para Selección Espacial (Mouse y Touch) ---
         this.map.on('mousedown', (e) => {
             if (this.drawMode === 'rect' || this.drawMode === 'circle') {
-                this.drawStart = [e.lngLat.lng, e.lngLat.lat];
+                this.startScreenPos = { x: e.point.x, y: e.point.y };
+                if (!this.drawStart) {
+                    this.drawStart = [e.lngLat.lng, e.lngLat.lat];
+                    this.isDraggingShape = true;
+                }
             }
         });
 
@@ -923,19 +1070,62 @@ const MapModule = {
             }
         });
 
+        this.map.on('mouseup', (e) => {
+            if ((this.drawMode === 'rect' || this.drawMode === 'circle') && this.drawStart && this.startScreenPos) {
+                const screenDist = Math.hypot(e.point.x - this.startScreenPos.x, e.point.y - this.startScreenPos.y);
+                if (screenDist > 18) {
+                    // Arrastre confirmado (Drag)
+                    if (this.drawMode === 'rect') finishRect(this.drawStart, [e.lngLat.lng, e.lngLat.lat]);
+                    else finishCircle(this.drawStart, [e.lngLat.lng, e.lngLat.lat]);
+                } else {
+                    // Clic o toque discreto (Tap 1)
+                    this.isDraggingShape = false;
+                    if (this.drawMode === 'rect') {
+                        showHint('Punto 1 fijado. Toca la esquina opuesta para completar el rectángulo.');
+                    } else {
+                        showHint('Centro fijado. Toca otro punto para definir el radio.');
+                    }
+                    // Dibujar punto inicial
+                    updateSelectionGeoJSON({
+                        type: 'FeatureCollection',
+                        features: [{
+                            type: 'Feature',
+                            properties: { isMask: false },
+                            geometry: { type: 'Point', coordinates: this.drawStart }
+                        }]
+                    });
+                }
+            }
+        });
+
         this.map.on('click', (e) => {
-            if (this.drawMode === 'poly') {
+            if (this.drawMode === 'rect') {
+                if (this.drawStart && !this.isDraggingShape) {
+                    const degDist = Math.hypot(e.lngLat.lng - this.drawStart[0], e.lngLat.lat - this.drawStart[1]);
+                    if (degDist > 0.0001) {
+                        finishRect(this.drawStart, [e.lngLat.lng, e.lngLat.lat]);
+                    }
+                }
+            } else if (this.drawMode === 'circle') {
+                if (this.drawStart && !this.isDraggingShape) {
+                    const degDist = Math.hypot(e.lngLat.lng - this.drawStart[0], e.lngLat.lat - this.drawStart[1]);
+                    if (degDist > 0.0001) {
+                        finishCircle(this.drawStart, [e.lngLat.lng, e.lngLat.lat]);
+                    }
+                }
+            } else if (this.drawMode === 'poly') {
                 if (this.drawPoints.length >= 3) {
                     const firstPt = this.drawPoints[0];
                     const p1 = this.map.project([firstPt[0], firstPt[1]]);
                     const p2 = this.map.project([e.lngLat.lng, e.lngLat.lat]);
-                    if (Math.hypot(p1.x - p2.x, p1.y - p2.y) < 18) {
+                    if (Math.hypot(p1.x - p2.x, p1.y - p2.y) < 22) {
                         finishPolygon();
                         return;
                     }
                 }
                 this.drawPoints.push([e.lngLat.lng, e.lngLat.lat]);
                 renderPolygonDraft();
+                showHint(`Polígono: ${this.drawPoints.length} puntos. ${this.drawPoints.length >= 3 ? 'Toca "✓ Terminar" o el primer punto.' : 'Toca más puntos.'}`, this.drawPoints.length >= 3);
             }
         });
 
@@ -950,38 +1140,6 @@ const MapModule = {
             if (this.drawMode === 'poly') {
                 e.preventDefault();
                 finishPolygon();
-            }
-        });
-
-        this.map.on('mouseup', (e) => {
-            if (this.drawMode === 'rect' && this.drawStart) {
-                const [minLng, maxLng] = [Math.min(this.drawStart[0], e.lngLat.lng), Math.max(this.drawStart[0], e.lngLat.lng)];
-                const [minLat, maxLat] = [Math.min(this.drawStart[1], e.lngLat.lat), Math.max(this.drawStart[1], e.lngLat.lat)];
-                window.App.selection = { type: 'rect', s: minLat, n: maxLat, w: minLng, e: maxLng };
-                const ring = [[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]];
-                updateSelectionGeoJSON(ring);
-                exitDrawMode();
-                document.getElementById('selection-badge').classList.add('show');
-                window.App.scheduleUpdate();
-            } else if (this.drawMode === 'circle' && this.drawStart) {
-                const haversineMeters = (lat1, lon1, lat2, lon2) => {
-                    const R = 6371000, toRad = Math.PI / 180;
-                    const dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
-                    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) ** 2;
-                    return 2 * R * Math.asin(Math.sqrt(a));
-                };
-                const radiusMeters = haversineMeters(this.drawStart[1], this.drawStart[0], e.lngLat.lat, e.lngLat.lng);
-                window.App.selection = { type: 'circle', lat: this.drawStart[1], lng: this.drawStart[0], r: radiusMeters };
-                const rDeg = Math.hypot(e.lngLat.lng - this.drawStart[0], e.lngLat.lat - this.drawStart[1]);
-                const ring = [];
-                for (let i = 0; i <= 36; i++) {
-                    const a = (i / 36) * Math.PI * 2;
-                    ring.push([this.drawStart[0] + Math.cos(a) * rDeg, this.drawStart[1] + Math.sin(a) * rDeg]);
-                }
-                updateSelectionGeoJSON(ring);
-                exitDrawMode();
-                document.getElementById('selection-badge').classList.add('show');
-                window.App.scheduleUpdate();
             }
         });
 
@@ -1000,8 +1158,12 @@ const MapModule = {
         window.addEventListener('keydown', (e) => {
             if (this.drawMode === 'poly') {
                 if (e.key === 'Enter') finishPolygon();
-                if (e.key === 'Escape') clearSelection();
+                if (e.key === 'Escape') exitDrawMode();
+            } else if (this.drawMode) {
+                if (e.key === 'Escape') exitDrawMode();
             }
         });
     }
 };
+
+window.MapModule = MapModule;

@@ -109,7 +109,7 @@ const FiltersModule = {
         this.activeFilters.municipios = new Set(munis);
 
         document.getElementById('muni-checklist').innerHTML = munis.map(m => {
-            return `<label class="check-row" data-name="${esc(normEs(m))}"><input type="checkbox" checked data-v="${esc(m)}"><span>${esc(m)}</span><span class="cnt">${muniCounts[m]}</span></label>`;
+            return `<div class="check-row" data-name="${esc(normEs(m))}"><label class="check-label"><input type="checkbox" checked data-v="${esc(m)}"><span>${esc(m)}</span></label><span class="cnt">${muniCounts[m]}</span><button type="button" class="btn-zoom-muni" data-muni="${esc(m)}" title="Centrar mapa en ${esc(m)}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></button></div>`;
         }).join('');
 
         // Lista de selección: Tipo de Incidente
@@ -180,6 +180,28 @@ const FiltersModule = {
                 const v = cb.getAttribute('data-v');
                 if (cb.checked) this.activeFilters.municipios.add(v); else this.activeFilters.municipios.delete(v);
                 window.App.scheduleUpdate();
+            });
+
+            muniChecklist.addEventListener('click', (e) => {
+                const zoomBtn = e.target.closest('.btn-zoom-muni');
+                if (zoomBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const muni = zoomBtn.getAttribute('data-muni');
+                    const row = zoomBtn.closest('.check-row');
+                    if (row) {
+                        const cb = row.querySelector('input[type="checkbox"]');
+                        if (cb && !cb.checked) {
+                            cb.checked = true;
+                            this.activeFilters.municipios.add(muni);
+                            window.App.scheduleUpdate();
+                        }
+                    }
+                    const mapMod = (typeof MapModule !== 'undefined' ? MapModule : window.MapModule);
+                    if (mapMod && mapMod.flyToMunicipality) {
+                        mapMod.flyToMunicipality(muni);
+                    }
+                }
             });
         }
 
@@ -417,3 +439,5 @@ const FiltersModule = {
         }
     }
 };
+
+window.FiltersModule = FiltersModule;

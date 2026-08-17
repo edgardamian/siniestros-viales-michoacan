@@ -31,9 +31,12 @@ window.App = {
             const loadingEl = document.getElementById('loading');
             if (loadingEl) loadingEl.style.display = 'none';
 
-            // 3. Inicializar módulos de gráficos y filtros
+            // 3. Inicializar módulos de gráficos, filtros y reproductor temporal
             ChartsModule.init();
             FiltersModule.init();
+            if (typeof PlayerModule !== 'undefined') {
+                PlayerModule.init();
+            }
 
             // 4. Programar la primera actualización del tablero
             this.scheduleUpdate();
@@ -89,6 +92,11 @@ window.App = {
 
         // 5. Actualizar todos los gráficos en pantalla
         ChartsModule.updateAll();
+
+        // 6. Sincronizar badge del reproductor temporal
+        if (typeof PlayerModule !== 'undefined' && PlayerModule.updateTimelineUI) {
+            PlayerModule.updateTimelineUI();
+        }
     }
 };
 

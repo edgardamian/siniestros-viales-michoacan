@@ -109,6 +109,19 @@ const DataModule = {
                 }
             };
 
+            // 0. Cargar límites y centroides de municipios precalculados (0 ms de overhead)
+            fetch('data/muni_bounds.json')
+                .then(r => r.json())
+                .then(b => {
+                    const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                    const cleanBounds = {};
+                    Object.keys(b).forEach(k => {
+                        cleanBounds[norm(k)] = b[k];
+                    });
+                    this.muniBounds = cleanBounds;
+                })
+                .catch(err => console.warn("Aviso: No se pudo cargar muni_bounds.json:", err));
+
             // 1. Cargar archivo vehiculos.csv
             Papa.parse("data/vehiculos.csv", {
                 download: true,
@@ -170,18 +183,20 @@ const DataModule = {
         const filterVia = activeFilters.vias && FiltersModule.fullSets && FiltersModule.fullSets.vias && activeFilters.vias.size < FiltersModule.fullSets.vias.size;
         const filterSuperf = activeFilters.superfs && FiltersModule.fullSets && FiltersModule.fullSets.superfs && activeFilters.superfs.size < FiltersModule.fullSets.superfs.size;
         const filterSexo = activeFilters.sexos && FiltersModule.fullSets && FiltersModule.fullSets.sexos && activeFilters.sexos.size < FiltersModule.fullSets.sexos.size;
+        const filterMonthKey = activeFilters.targetMonthKey !== undefined && activeFilters.targetMonthKey !== null;
         const filterSel = Boolean(sel && sel.type);
 
         // Si no hay ningún filtro activo, retornar la base de datos completa inmediatamente
-        if (!filterYear && !filterHour && !filterWk && !filterSev && !filterVehi && !filterMuni && !filterTipo && !filterClima && !filterVia && !filterSuperf && !filterSexo && !filterSel) {
+        if (!filterYear && !filterHour && !filterWk && !filterSev && !filterVehi && !filterMuni && !filterTipo && !filterClima && !filterVia && !filterSuperf && !filterSexo && !filterSel && !filterMonthKey) {
             this.filteredData = this.allData;
             return this.filteredData;
         }
 
-        const { yearMin, yearMax, hourMin, hourMax, weekdays, severidad, vehiculos, municipios, tipos, climas, vias, superfs, sexos } = activeFilters;
+        const { yearMin, yearMax, hourMin, hourMax, weekdays, severidad, vehiculos, municipios, tipos, climas, vias, superfs, sexos, targetMonthKey } = activeFilters;
 
         // Iteración de filtrado registro por registro
         this.filteredData = this.allData.filter(item => {
+            if (filterMonthKey && item.monthKey !== targetMonthKey) return false;
             if (filterYear && (item.anio_origen < yearMin || item.anio_origen > yearMax)) return false;
             if (filterHour && (item.hora_redondeada < hourMin || item.hora_redondeada > hourMax)) return false;
             if (filterWk && !weekdays.has(item.wkIdx)) return false;
@@ -385,3 +400,5 @@ const DataModule = {
         return counts;
     }
 };
+
+window.DataModule = DataModule;
