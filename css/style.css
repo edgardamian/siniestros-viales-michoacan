@@ -600,14 +600,23 @@ main.layout {
 }
 
 .tp-play-btn:hover {
-  background: var(--cono-naranja-brillante);
-  transform: scale(1.03);
+  background: var(--cono-brillante);
+  color: #0b0e14;
+  transform: scale(1.04);
+  box-shadow: 0 3px 12px rgba(255, 106, 0, 0.5);
 }
 
 .tp-play-btn.playing {
+  background: var(--senial-amarillo);
+  color: #0b0e14;
+  box-shadow: 0 0 10px rgba(255, 214, 0, 0.4);
+}
+
+.tp-play-btn.playing:hover {
   background: var(--senial-amarillo-brillante);
   color: #0b0e14;
-  box-shadow: 0 0 10px rgba(255, 230, 0, 0.4);
+  transform: scale(1.04);
+  box-shadow: 0 0 14px rgba(255, 234, 0, 0.6);
 }
 
 .tp-btn-group {
