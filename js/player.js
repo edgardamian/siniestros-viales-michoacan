@@ -3,6 +3,7 @@
  * ARCHIVO: js/player.js
  * DESCRIPCIÓN: Reproductor Temporal / Animación Time-Lapse.
  * Permite reproducir en secuencia los accidentes por Hora, Día de la Semana o Mes/Año.
+ * En modo Días, comienza en Lunes y avanza hasta Domingo.
  * ==============================================================================
  */
 
@@ -13,6 +14,10 @@ const PlayerModule = {
     currentIndex: 0,
     timer: null,
     monthList: [],
+    // Secuencia de días de la semana iniciando en Lunes:
+    // 1: Lun, 2: Mar, 3: Mié, 4: Jue, 5: Vie, 6: Sáb, 0: Dom
+    weekdayOrder: [1, 2, 3, 4, 5, 6, 0],
+    weekdayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
 
     init() {
         this.buildMonthList();
@@ -129,10 +134,10 @@ const PlayerModule = {
             const tagEl = document.getElementById('hour-range-tag');
             if (tagEl) tagEl.textContent = `${String(h).padStart(2, '0')}:00 h`;
         } else if (this.mode === 'weekday') {
-            const wkFullNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            filtersMod.activeFilters.weekdays = new Set([idx]);
+            const dayId = this.weekdayOrder[idx];
+            filtersMod.activeFilters.weekdays = new Set([dayId]);
             const tagEl = document.getElementById('weekday-range-tag');
-            if (tagEl) tagEl.textContent = wkFullNames[idx] || '';
+            if (tagEl) tagEl.textContent = this.weekdayNames[dayId] || '';
             if (filtersMod.updateWkPresetsUI) filtersMod.updateWkPresetsUI();
         } else if (this.mode === 'month') {
             if (this.monthList[idx]) {
@@ -162,7 +167,7 @@ const PlayerModule = {
         } else if (this.mode === 'weekday') {
             filtersMod.activeFilters.weekdays = new Set([0, 1, 2, 3, 4, 5, 6]);
             const tagEl = document.getElementById('weekday-range-tag');
-            if (tagEl) tagEl.textContent = 'Dom – Sáb';
+            if (tagEl) tagEl.textContent = 'Lun – Dom';
             if (filtersMod.updateWkPresetsUI) filtersMod.updateWkPresetsUI();
         } else if (this.mode === 'month') {
             delete filtersMod.activeFilters.targetMonthKey;
@@ -188,7 +193,7 @@ const PlayerModule = {
             const hTag = document.getElementById('hour-range-tag');
             if (hTag) hTag.textContent = '00 – 23 h';
             const wTag = document.getElementById('weekday-range-tag');
-            if (wTag) wTag.textContent = 'Dom – Sáb';
+            if (wTag) wTag.textContent = 'Lun – Dom';
             if (filtersMod.updateWkPresetsUI) filtersMod.updateWkPresetsUI();
         }
 
@@ -225,8 +230,8 @@ const PlayerModule = {
         if (this.mode === 'hour') {
             text = `⏰ ${String(this.currentIndex).padStart(2, '0')}:00 h`;
         } else if (this.mode === 'weekday') {
-            const wkFullNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            text = `📅 ${wkFullNames[this.currentIndex] || ''}`;
+            const dayId = this.weekdayOrder[this.currentIndex];
+            text = `📅 ${this.weekdayNames[dayId] || ''}`;
         } else if (this.mode === 'month') {
             text = this.monthList[this.currentIndex] ? `📈 ${this.monthList[this.currentIndex].label}` : '';
         }

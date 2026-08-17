@@ -610,7 +610,7 @@ const ChartsModule = {
         // Actualizar la etiqueta del periodo activo
         const tagEl = document.getElementById('weekday-range-tag');
         if (tagEl) {
-            if (activeDays.size === 7) tagEl.textContent = 'Dom – Sáb';
+            if (activeDays.size === 7) tagEl.textContent = 'Lun – Dom';
             else if (activeDays.size === 5 && [1, 2, 3, 4, 5].every(d => activeDays.has(d))) tagEl.textContent = 'Lun – Vie';
             else if (activeDays.size === 2 && activeDays.has(6) && activeDays.has(0)) tagEl.textContent = 'Sáb – Dom';
             else tagEl.textContent = `${activeDays.size}/7 días`;
