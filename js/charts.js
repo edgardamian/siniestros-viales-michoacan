@@ -316,6 +316,7 @@ const ChartsModule = {
 
     /**
      * Gráfica de Barras: Top Tipos de Incidente Vial con Escala Adaptable
+     * Abreviación de "COLISIÓN" a "C." para optimizar espacio
      */
     renderTipos() {
         const el = document.getElementById('chart-tipos');
@@ -323,7 +324,11 @@ const ChartsModule = {
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
         const tipos = dataMod.getTopTipos();
-        const labels = tipos.map(t => t[0].length > 35 ? t[0].slice(0, 33) + '…' : t[0]);
+        const formatTipo = (str) => {
+            let s = str.replace(/COLISI[OÓ]N/gi, 'C.').trim();
+            return s.length > 30 ? s.slice(0, 28) + '…' : s;
+        };
+        const labels = tipos.map(t => formatTipo(t[0]));
         const data = tipos.map(t => t[1]);
 
         if (this.tiposChartInst) {
@@ -347,7 +352,18 @@ const ChartsModule = {
             options: {
                 animation: false,
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const idx = items[0].dataIndex;
+                                return (tipos[idx] && tipos[idx][0]) ? tipos[idx][0] : items[0].label;
+                            },
+                            label: (item) => `Accidentes: ${item.raw.toLocaleString('es-MX')}`
+                        }
+                    }
+                },
                 scales: {
                     x: { grid: { color: '#1b2331' }, beginAtZero: true },
                     y: { grid: { display: false }, ticks: { font: { size: 10 } } }
