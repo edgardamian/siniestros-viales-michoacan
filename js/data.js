@@ -386,6 +386,68 @@ const DataModule = {
     },
 
     /**
+     * Obtiene la distribución horaria completa excluyendo únicamente el filtro de hora
+     * para mantener fija la gráfica de horas mientras se anima.
+     */
+    getClockDataExcludingHour() {
+        const activeFilters = (typeof FiltersModule !== 'undefined' ? FiltersModule.activeFilters : {}) || {};
+        const sel = (window.App && window.App.selection);
+        const filterYear = activeFilters.yearMin !== undefined && activeFilters.yearMax !== undefined && (activeFilters.yearMin > 2016 || activeFilters.yearMax < 2026);
+        const filterWk = activeFilters.weekdays && activeFilters.weekdays.size < 7;
+        const filterSev = activeFilters.severidad && activeFilters.severidad !== 'todos';
+        const filterVehi = activeFilters.vehiculos && FiltersModule.fullSets && FiltersModule.fullSets.vehiculos && activeFilters.vehiculos.size < FiltersModule.fullSets.vehiculos.size;
+        const filterMuni = activeFilters.municipios && FiltersModule.fullSets && FiltersModule.fullSets.municipios && activeFilters.municipios.size < FiltersModule.fullSets.municipios.size;
+        const filterTipo = activeFilters.tipos && FiltersModule.fullSets && FiltersModule.fullSets.tipos && activeFilters.tipos.size < FiltersModule.fullSets.tipos.size;
+        const filterClima = activeFilters.climas && FiltersModule.fullSets && FiltersModule.fullSets.climas && activeFilters.climas.size < FiltersModule.fullSets.climas.size;
+        const filterVia = activeFilters.vias && FiltersModule.fullSets && FiltersModule.fullSets.vias && activeFilters.vias.size < FiltersModule.fullSets.vias.size;
+        const filterSuperf = activeFilters.superfs && FiltersModule.fullSets && FiltersModule.fullSets.superfs && activeFilters.superfs.size < FiltersModule.fullSets.superfs.size;
+        const filterSexo = activeFilters.sexos && FiltersModule.fullSets && FiltersModule.fullSets.sexos && activeFilters.sexos.size < FiltersModule.fullSets.sexos.size;
+        const filterMonthKey = activeFilters.targetMonthKey !== undefined && activeFilters.targetMonthKey !== null;
+        const filterSel = Boolean(sel && sel.type);
+
+        const counts = new Array(24).fill(0);
+        const fatals = new Array(24).fill(0);
+        const len = this.allData.length;
+
+        for (let i = 0; i < len; i++) {
+            const item = this.allData[i];
+            if (filterMonthKey && item.monthKey !== activeFilters.targetMonthKey) continue;
+            if (filterYear && (item.anio_origen < activeFilters.yearMin || item.anio_origen > activeFilters.yearMax)) continue;
+            if (filterWk && !activeFilters.weekdays.has(item.wkIdx)) continue;
+            if (filterSev) {
+                if (activeFilters.severidad === 'danos' && item.sevVal !== 0) continue;
+                if (activeFilters.severidad === 'heridos' && item.sevVal !== 1) continue;
+                if (activeFilters.severidad === 'fatal' && item.sevVal !== 2) continue;
+            }
+            if (filterVehi) {
+                let hasV = false;
+                if (item.vehiculos) {
+                    for (let j = 0; j < item.vehiculos.length; j++) {
+                        if (activeFilters.vehiculos.has(item.vehiculos[j])) { hasV = true; break; }
+                    }
+                }
+                if (!hasV) continue;
+            }
+            if (filterMuni && !activeFilters.municipios.has(item.muniStr)) continue;
+            if (filterTipo && !activeFilters.tipos.has(item.tipoStr)) continue;
+            if (filterClima && !activeFilters.climas.has(item.climaStr)) continue;
+            if (filterVia && !activeFilters.vias.has(item.viaStr)) continue;
+            if (filterSuperf && !activeFilters.superfs.has(item.superfStr)) continue;
+            if (filterSexo && !activeFilters.sexos.has(item.sexoStr)) continue;
+            if (filterSel) {
+                if (sel.type === 'rect' && (item.lat < sel.s || item.lat > sel.n || item.lon < sel.w || item.lon > sel.e)) continue;
+            }
+
+            let h = Math.floor(Number(item.hora_redondeada));
+            if (!isNaN(h) && h >= 0 && h < 24) {
+                counts[h]++;
+                if (item.sevVal === 2) fatals[h]++;
+            }
+        }
+        return { counts, fatals };
+    },
+
+    /**
      * Obtiene la distribución por día de la semana.
      */
     getWeekdayData() {
@@ -393,6 +455,66 @@ const DataModule = {
         const len = this.filteredData.length;
         for (let i = 0; i < len; i++) {
             const wkIdx = this.filteredData[i].wkIdx;
+            if (wkIdx >= 0 && wkIdx < 7) {
+                counts[wkIdx]++;
+            }
+        }
+        return counts;
+    },
+
+    /**
+     * Obtiene la distribución semanal completa excluyendo únicamente el filtro de día
+     * para mantener fija la gráfica de días mientras se anima.
+     */
+    getWeekdayDataExcludingWeekday() {
+        const activeFilters = (typeof FiltersModule !== 'undefined' ? FiltersModule.activeFilters : {}) || {};
+        const sel = (window.App && window.App.selection);
+        const filterYear = activeFilters.yearMin !== undefined && activeFilters.yearMax !== undefined && (activeFilters.yearMin > 2016 || activeFilters.yearMax < 2026);
+        const filterHour = activeFilters.hourMin !== undefined && activeFilters.hourMax !== undefined && (activeFilters.hourMin > 0 || activeFilters.hourMax < 23);
+        const filterSev = activeFilters.severidad && activeFilters.severidad !== 'todos';
+        const filterVehi = activeFilters.vehiculos && FiltersModule.fullSets && FiltersModule.fullSets.vehiculos && activeFilters.vehiculos.size < FiltersModule.fullSets.vehiculos.size;
+        const filterMuni = activeFilters.municipios && FiltersModule.fullSets && FiltersModule.fullSets.municipios && activeFilters.municipios.size < FiltersModule.fullSets.municipios.size;
+        const filterTipo = activeFilters.tipos && FiltersModule.fullSets && FiltersModule.fullSets.tipos && activeFilters.tipos.size < FiltersModule.fullSets.tipos.size;
+        const filterClima = activeFilters.climas && FiltersModule.fullSets && FiltersModule.fullSets.climas && activeFilters.climas.size < FiltersModule.fullSets.climas.size;
+        const filterVia = activeFilters.vias && FiltersModule.fullSets && FiltersModule.fullSets.vias && activeFilters.vias.size < FiltersModule.fullSets.vias.size;
+        const filterSuperf = activeFilters.superfs && FiltersModule.fullSets && FiltersModule.fullSets.superfs && activeFilters.superfs.size < FiltersModule.fullSets.superfs.size;
+        const filterSexo = activeFilters.sexos && FiltersModule.fullSets && FiltersModule.fullSets.sexos && activeFilters.sexos.size < FiltersModule.fullSets.sexos.size;
+        const filterMonthKey = activeFilters.targetMonthKey !== undefined && activeFilters.targetMonthKey !== null;
+        const filterSel = Boolean(sel && sel.type);
+
+        const counts = new Array(7).fill(0);
+        const len = this.allData.length;
+
+        for (let i = 0; i < len; i++) {
+            const item = this.allData[i];
+            if (filterMonthKey && item.monthKey !== activeFilters.targetMonthKey) continue;
+            if (filterYear && (item.anio_origen < activeFilters.yearMin || item.anio_origen > activeFilters.yearMax)) continue;
+            if (filterHour && (item.hora_redondeada < activeFilters.hourMin || item.hora_redondeada > activeFilters.hourMax)) continue;
+            if (filterSev) {
+                if (activeFilters.severidad === 'danos' && item.sevVal !== 0) continue;
+                if (activeFilters.severidad === 'heridos' && item.sevVal !== 1) continue;
+                if (activeFilters.severidad === 'fatal' && item.sevVal !== 2) continue;
+            }
+            if (filterVehi) {
+                let hasV = false;
+                if (item.vehiculos) {
+                    for (let j = 0; j < item.vehiculos.length; j++) {
+                        if (activeFilters.vehiculos.has(item.vehiculos[j])) { hasV = true; break; }
+                    }
+                }
+                if (!hasV) continue;
+            }
+            if (filterMuni && !activeFilters.municipios.has(item.muniStr)) continue;
+            if (filterTipo && !activeFilters.tipos.has(item.tipoStr)) continue;
+            if (filterClima && !activeFilters.climas.has(item.climaStr)) continue;
+            if (filterVia && !activeFilters.vias.has(item.viaStr)) continue;
+            if (filterSuperf && !activeFilters.superfs.has(item.superfStr)) continue;
+            if (filterSexo && !activeFilters.sexos.has(item.sexoStr)) continue;
+            if (filterSel) {
+                if (sel.type === 'rect' && (item.lat < sel.s || item.lat > sel.n || item.lon < sel.w || item.lon > sel.e)) continue;
+            }
+
+            const wkIdx = item.wkIdx;
             if (wkIdx >= 0 && wkIdx < 7) {
                 counts[wkIdx]++;
             }

@@ -3,7 +3,8 @@
  * ARCHIVO: js/charts.js
  * DESCRIPCIÓN: Módulo de renderizado y actualización de gráficos con Chart.js.
  * Administra las 6 gráficas interactivas y la lista de colonias del tablero.
- * Las escalas se adaptan dinámicamente a los datos filtrados para máxima visibilidad.
+ * - La gráfica que corre la animación mantiene su eje Y FIJO para ver el cursor en contexto.
+ * - Las demás gráficas adaptan su escala DINÁMICAMENTE para aprovechar toda el área visual.
  * ==============================================================================
  */
 
@@ -16,6 +17,13 @@ const ChartsModule = {
     hoursChartInst: null,
     weekdaysChartInst: null,
 
+    // Variables base globales para los ejes fijos
+    baselinesReady: false,
+    baseHourMax: 4500,
+    baseWeekdayMax: 11000,
+    baseTrendTotalMax: 1000,
+    baseTrendFatalMax: 25,
+
     /**
      * Configuración global de fuentes y colores para Chart.js
      */
@@ -27,9 +35,53 @@ const ChartsModule = {
     },
 
     /**
+     * Precalcula los máximos globales del conjunto de datos completo
+     * para fijar el eje de la gráfica que corre la animación.
+     */
+    initBaselines() {
+        const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
+        if (!dataMod || !dataMod.allData || dataMod.allData.length === 0) return;
+
+        // Horas
+        const hCounts = new Array(24).fill(0);
+        dataMod.allData.forEach(d => {
+            const h = Math.floor(Number(d.hora_redondeada));
+            if (!isNaN(h) && h >= 0 && h < 24) hCounts[h]++;
+        });
+        this.baseHourMax = Math.ceil(Math.max(...hCounts) * 1.08);
+
+        // Días
+        const wCounts = new Array(7).fill(0);
+        dataMod.allData.forEach(d => {
+            if (d.wkIdx >= 0 && d.wkIdx < 7) wCounts[d.wkIdx]++;
+        });
+        this.baseWeekdayMax = Math.ceil(Math.max(...wCounts) * 1.08);
+
+        // Tendencia
+        const mTotals = new Map();
+        const mFatals = new Map();
+        dataMod.allData.forEach(d => {
+            if (d.monthKey) {
+                if (d.sevVal !== 2) mTotals.set(d.monthKey, (mTotals.get(d.monthKey) || 0) + 1);
+                if (d.sevVal === 2) {
+                    const fCount = (d.numero_personas_fallecidas && d.numero_personas_fallecidas > 0) ? d.numero_personas_fallecidas : 1;
+                    mFatals.set(d.monthKey, (mFatals.get(d.monthKey) || 0) + fCount);
+                }
+            }
+        });
+        const maxTot = Math.max(1, ...Array.from(mTotals.values()));
+        const maxFat = Math.max(1, ...Array.from(mFatals.values()));
+        this.baseTrendTotalMax = Math.ceil(maxTot * 1.08);
+        this.baseTrendFatalMax = Math.ceil(maxFat * 1.08);
+
+        this.baselinesReady = true;
+    },
+
+    /**
      * Actualiza todas las gráficas en un solo ciclo
      */
     updateAll() {
+        if (!this.baselinesReady) this.initBaselines();
         this.renderTrend();
         this.renderVehiculos();
         this.renderSeverity();
@@ -51,7 +103,6 @@ const ChartsModule = {
         const labels = vehiculos.map(v => v[0].length > 35 ? v[0].slice(0, 33) + '…' : v[0]);
         const data = vehiculos.map(v => v[1]);
 
-        // Si la gráfica ya existe, actualizamos etiquetas y datos dinámicamente
         if (this.vehiculosChartInst) {
             this.vehiculosChartInst.data.labels = labels;
             this.vehiculosChartInst.data.datasets[0].data = data;
@@ -83,7 +134,8 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Líneas: Tendencia Mensual (Accidentes Totales vs Defunciones) con Escalas Adaptables
+     * Gráfica de Líneas: Tendencia Mensual (Accidentes Totales vs Defunciones)
+     * Fija en animación de meses, adaptable en otras animaciones
      */
     renderTrend() {
         const tagEl = document.getElementById('trend-range-tag');
@@ -92,12 +144,10 @@ const ChartsModule = {
         const yMax = FiltersModule.activeFilters ? FiltersModule.activeFilters.yearMax : 2026;
         const isYearFiltered = (yMin > 2016 || yMax < 2026);
 
-        // Actualizar etiqueta del título con el periodo activo (ej: 2018–2022)
         if (tagEl) {
             tagEl.textContent = (yMin === yMax) ? `${yMin}` : `${yMin}–${yMax}`;
         }
 
-        // Mostrar botón de reinicio "↺ Todos" si el periodo está filtrado
         if (resetBox) {
             if (isYearFiltered) {
                 const numYears = (yMax - yMin + 1);
@@ -121,12 +171,21 @@ const ChartsModule = {
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
         const chartData = dataMod.groupByMonthAndFatalities();
+        const isMonthAnimation = (window.PlayerModule && window.PlayerModule.isPlaying && window.PlayerModule.mode === 'month');
 
-        // Actualización in-place si la gráfica ya existe
         if (this.trendChartInst) {
             this.trendChartInst.data.labels = chartData.labels;
             this.trendChartInst.data.datasets[0].data = chartData.totals;
             this.trendChartInst.data.datasets[1].data = chartData.fatals;
+
+            if (isMonthAnimation) {
+                this.trendChartInst.options.scales.y.max = this.baseTrendTotalMax;
+                this.trendChartInst.options.scales.y2.max = this.baseTrendFatalMax;
+            } else {
+                delete this.trendChartInst.options.scales.y.max;
+                delete this.trendChartInst.options.scales.y2.max;
+            }
+
             this.trendChartInst.update('none');
             return;
         }
@@ -302,23 +361,33 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras: Accidentes por Hora (00 a 23 h) con Escala Y Adaptable
+     * Gráfica de Barras: Accidentes por Hora (00 a 23 h)
+     * - Si la animación por Horas está activa o el usuario filtró por horas:
+     *   Mantiene su eje Y FIJO en el tope global y muestra las 24 barras con la activa resaltada.
+     * - Si la animación por Días/Meses está activa:
+     *   Adapta su eje Y DINÁMICAMENTE para mostrar la curva con toda su altura y detalle.
      */
     renderHoursChart() {
         const el = document.getElementById('chart-hours');
         if (!el) return;
+        if (!this.baselinesReady) this.initBaselines();
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        const { counts } = dataMod.getClockData();
-        const maxC = Math.max(1, ...counts);
-        const peakHour = counts.indexOf(maxC);
         const hMin = FiltersModule.activeFilters.hourMin !== undefined ? FiltersModule.activeFilters.hourMin : 0;
         const hMax = FiltersModule.activeFilters.hourMax !== undefined ? FiltersModule.activeFilters.hourMax : 23;
         const isHourFiltered = (hMin > 0 || hMax < 23);
+        const isHourMode = (window.PlayerModule && window.PlayerModule.isPlaying && window.PlayerModule.mode === 'hour') || isHourFiltered;
 
+        // Si se anima o filtra por hora, obtener las 24 barras de contexto
+        const clockData = isHourMode && dataMod.getClockDataExcludingHour
+            ? dataMod.getClockDataExcludingHour()
+            : dataMod.getClockData();
+
+        const counts = clockData.counts;
+        const maxC = Math.max(1, ...counts);
+        const peakHour = counts.indexOf(maxC);
         const labels = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 
-        // Resaltar barras según hora pico o rango seleccionado por el usuario
         const bgColors = counts.map((c, i) => {
             if (isHourFiltered) {
                 if (i >= hMin && i <= hMax) return '#ff1744';
@@ -332,6 +401,14 @@ const ChartsModule = {
         if (this.hoursChartInst) {
             this.hoursChartInst.data.datasets[0].data = counts;
             this.hoursChartInst.data.datasets[0].backgroundColor = bgColors;
+
+            // Fijar eje Y si está en modo Horas; adaptar dinámicamente en modo Días/Meses
+            if (isHourMode) {
+                this.hoursChartInst.options.scales.y.max = this.baseHourMax;
+            } else {
+                delete this.hoursChartInst.options.scales.y.max;
+            }
+
             this.hoursChartInst.update('none');
         } else {
             const ctx = el.getContext('2d');
@@ -381,13 +458,17 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
-                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
+                        y: {
+                            grid: { color: '#1b2331' },
+                            beginAtZero: true,
+                            max: isHourMode ? this.baseHourMax : undefined,
+                            ticks: { font: { size: 9.5 } }
+                        }
                     }
                 }
             });
         }
 
-        // Actualizar la nota de hora pico o contador con botón "↺ Todos"
         const noteEl = document.getElementById('peak-hour-note');
         if (noteEl) {
             if (isHourFiltered) {
@@ -412,20 +493,31 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras: Día de la Semana (Lunes a Domingo) con Escala Y Adaptable
+     * Gráfica de Barras: Día de la Semana (Lunes a Domingo)
+     * - Si la animación por Días está activa o el usuario filtró días:
+     *   Mantiene su eje Y FIJO en el tope global y muestra los 7 días con el activo resaltado.
+     * - Si la animación por Horas/Meses está activa:
+     *   Adapta su eje Y DINÁMICAMENTE para mostrar las barras con toda su altura y detalle.
      */
     renderWeekdaysChart() {
         const el = document.getElementById('chart-weekdays');
         if (!el) return;
+        if (!this.baselinesReady) this.initBaselines();
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        const counts = dataMod.getWeekdayData();
+        const activeDays = FiltersModule.activeFilters.weekdays || new Set([0, 1, 2, 3, 4, 5, 6]);
+        const isFiltered = activeDays.size < 7;
+        const isWeekdayMode = (window.PlayerModule && window.PlayerModule.isPlaying && window.PlayerModule.mode === 'weekday') || isFiltered;
+
+        // Si se anima o filtra por día de la semana, obtener los 7 días de contexto
+        const counts = isWeekdayMode && dataMod.getWeekdayDataExcludingWeekday
+            ? dataMod.getWeekdayDataExcludingWeekday()
+            : dataMod.getWeekdayData();
+
         const wkLabels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const order = [1, 2, 3, 4, 5, 6, 0]; // Orden de despliegue: Lun a Dom
         const orderedLabels = order.map(i => wkLabels[i]);
         const orderedCounts = order.map(i => counts[i]);
-        const activeDays = FiltersModule.activeFilters.weekdays || new Set([0, 1, 2, 3, 4, 5, 6]);
-        const isFiltered = activeDays.size < 7;
 
         const bgColors = order.map(wd => {
             if (isFiltered && !activeDays.has(wd)) return 'rgba(148, 163, 184, 0.22)';
@@ -435,6 +527,14 @@ const ChartsModule = {
         if (this.weekdaysChartInst) {
             this.weekdaysChartInst.data.datasets[0].data = orderedCounts;
             this.weekdaysChartInst.data.datasets[0].backgroundColor = bgColors;
+
+            // Fijar eje Y si está en modo Días; adaptar dinámicamente en modo Horas/Meses
+            if (isWeekdayMode) {
+                this.weekdaysChartInst.options.scales.y.max = this.baseWeekdayMax;
+            } else {
+                delete this.weekdaysChartInst.options.scales.y.max;
+            }
+
             this.weekdaysChartInst.update('none');
         } else {
             const ctx = el.getContext('2d');
@@ -460,7 +560,6 @@ const ChartsModule = {
                             }
                         }
                     },
-                    // Al hacer clic en una barra se conmuta ese día de la semana
                     onClick: (e, activeElements) => {
                         if (activeElements.length > 0) {
                             const idx = activeElements[0].index;
@@ -482,13 +581,17 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
+                        y: {
+                            grid: { color: '#1b2331' },
+                            beginAtZero: true,
+                            max: isWeekdayMode ? this.baseWeekdayMax : undefined,
+                            ticks: { font: { size: 9.5 } }
+                        }
                     }
                 }
             });
         }
 
-        // Actualizar la etiqueta del periodo activo
         const tagEl = document.getElementById('weekday-range-tag');
         if (tagEl) {
             if (activeDays.size === 7) tagEl.textContent = 'Lun – Dom';
@@ -497,7 +600,6 @@ const ChartsModule = {
             else tagEl.textContent = `${activeDays.size}/7 días`;
         }
 
-        // Nombre del día con mayor concentración de accidentes
         const wkFullNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const maxWkCount = Math.max(1, ...counts);
         const peakDayIdx = counts.indexOf(maxWkCount);
