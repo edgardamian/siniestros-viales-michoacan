@@ -3,7 +3,7 @@
  * ARCHIVO: js/charts.js
  * DESCRIPCIÓN: Módulo de renderizado y actualización de gráficos con Chart.js.
  * Administra las 6 gráficas interactivas y la lista de colonias del tablero.
- * Incluye escalas estáticas globales para evitar saltos visuales durante la animación.
+ * Las escalas se adaptan dinámicamente a los datos filtrados para máxima visibilidad.
  * ==============================================================================
  */
 
@@ -16,18 +16,6 @@ const ChartsModule = {
     hoursChartInst: null,
     weekdaysChartInst: null,
 
-    // Variables de referencia base global (escalas estáticas)
-    baselinesReady: false,
-    baseVehiculoLabels: [],
-    baseVehiculoMax: 65000,
-    baseTipoLabels: [],
-    baseTipoMax: 20000,
-    baseColoniaMax: 2000,
-    baseHourMax: 4500,
-    baseWeekdayMax: 11000,
-    baseTrendTotalMax: 1000,
-    baseTrendFatalMax: 25,
-
     /**
      * Configuración global de fuentes y colores para Chart.js
      */
@@ -39,85 +27,9 @@ const ChartsModule = {
     },
 
     /**
-     * Precalcula los máximos globales del conjunto de datos completo
-     * para fijar los ejes y evitar que salten o cambien de escala al animar/filtrar.
-     */
-    initBaselines() {
-        const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        if (!dataMod || !dataMod.allData || dataMod.allData.length === 0) return;
-
-        // 1. Vehículos
-        const vCounts = {};
-        dataMod.allData.forEach(d => {
-            if (d.vehiculos) {
-                for (let i = 0; i < d.vehiculos.length; i++) {
-                    const v = d.vehiculos[i];
-                    vCounts[v] = (vCounts[v] || 0) + 1;
-                }
-            }
-        });
-        const vSorted = Object.entries(vCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-        this.baseVehiculoLabels = vSorted.map(v => v[0]);
-        this.baseVehiculoMax = Math.ceil((vSorted[0] ? vSorted[0][1] : 1000) * 1.06);
-
-        // 2. Tipos de Incidente
-        const tCounts = {};
-        dataMod.allData.forEach(d => {
-            const t = d.tipo_incidente_vial || 'Sin dato';
-            tCounts[t] = (tCounts[t] || 0) + 1;
-        });
-        const tSorted = Object.entries(tCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-        this.baseTipoLabels = tSorted.map(t => t[0]);
-        this.baseTipoMax = Math.ceil((tSorted[0] ? tSorted[0][1] : 1000) * 1.06);
-
-        // 3. Colonias
-        const cCounts = {};
-        dataMod.allData.forEach(d => {
-            if (d.coloniaClean) cCounts[d.coloniaClean] = (cCounts[d.coloniaClean] || 0) + 1;
-        });
-        const cSorted = Object.entries(cCounts).sort((a, b) => b[1] - a[1]);
-        this.baseColoniaMax = cSorted[0] ? cSorted[0][1] : 500;
-
-        // 4. Horas
-        const hCounts = new Array(24).fill(0);
-        dataMod.allData.forEach(d => {
-            const h = Math.floor(Number(d.hora_redondeada));
-            if (!isNaN(h) && h >= 0 && h < 24) hCounts[h]++;
-        });
-        this.baseHourMax = Math.ceil(Math.max(...hCounts) * 1.08);
-
-        // 5. Días de la semana
-        const wCounts = new Array(7).fill(0);
-        dataMod.allData.forEach(d => {
-            if (d.wkIdx >= 0 && d.wkIdx < 7) wCounts[d.wkIdx]++;
-        });
-        this.baseWeekdayMax = Math.ceil(Math.max(...wCounts) * 1.08);
-
-        // 6. Tendencia mensual
-        const mTotals = new Map();
-        const mFatals = new Map();
-        dataMod.allData.forEach(d => {
-            if (d.monthKey) {
-                if (d.sevVal !== 2) mTotals.set(d.monthKey, (mTotals.get(d.monthKey) || 0) + 1);
-                if (d.sevVal === 2) {
-                    const fCount = (d.numero_personas_fallecidas && d.numero_personas_fallecidas > 0) ? d.numero_personas_fallecidas : 1;
-                    mFatals.set(d.monthKey, (mFatals.get(d.monthKey) || 0) + fCount);
-                }
-            }
-        });
-        const maxTot = Math.max(1, ...Array.from(mTotals.values()));
-        const maxFat = Math.max(1, ...Array.from(mFatals.values()));
-        this.baseTrendTotalMax = Math.ceil(maxTot * 1.08);
-        this.baseTrendFatalMax = Math.ceil(maxFat * 1.08);
-
-        this.baselinesReady = true;
-    },
-
-    /**
      * Actualiza todas las gráficas en un solo ciclo
      */
     updateAll() {
-        if (!this.baselinesReady) this.initBaselines();
         this.renderTrend();
         this.renderVehiculos();
         this.renderSeverity();
@@ -128,36 +40,18 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras Horizontales: Tipo de Vehículo con Escala X fija
+     * Gráfica de Barras Horizontales: Tipo de Vehículo con Escala Adaptable
      */
     renderVehiculos() {
         const el = document.getElementById('chart-vehiculos');
         if (!el) return;
-        if (!this.baselinesReady) this.initBaselines();
 
-        const vehiculosMap = {};
-        const activeV = FiltersModule.activeFilters ? FiltersModule.activeFilters.vehiculos : null;
-        const isFiltered = activeV && FiltersModule.fullSets && FiltersModule.fullSets.vehiculos && activeV.size < FiltersModule.fullSets.vehiculos.size;
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        const len = dataMod.filteredData.length;
+        const vehiculos = dataMod.getTopVehiculos();
+        const labels = vehiculos.map(v => v[0].length > 35 ? v[0].slice(0, 33) + '…' : v[0]);
+        const data = vehiculos.map(v => v[1]);
 
-        for (let i = 0; i < len; i++) {
-            const d = dataMod.filteredData[i];
-            if (d.vehiculos) {
-                for (let j = 0; j < d.vehiculos.length; j++) {
-                    const v = d.vehiculos[j];
-                    if (!isFiltered || activeV.has(v)) {
-                        vehiculosMap[v] = (vehiculosMap[v] || 0) + 1;
-                    }
-                }
-            }
-        }
-
-        const baseLabels = this.baseVehiculoLabels || [];
-        const labels = baseLabels.map(v => v.length > 35 ? v.slice(0, 33) + '…' : v);
-        const data = baseLabels.map(v => vehiculosMap[v] || 0);
-
-        // Si la gráfica ya existe, solo actualizamos los datos sin re-crearla
+        // Si la gráfica ya existe, actualizamos etiquetas y datos dinámicamente
         if (this.vehiculosChartInst) {
             this.vehiculosChartInst.data.labels = labels;
             this.vehiculosChartInst.data.datasets[0].data = data;
@@ -181,7 +75,7 @@ const ChartsModule = {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: '#1b2331' }, beginAtZero: true, max: this.baseVehiculoMax },
+                    x: { grid: { color: '#1b2331' }, beginAtZero: true },
                     y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
@@ -189,7 +83,7 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Líneas: Tendencia Mensual (Accidentes Totales vs Defunciones)
+     * Gráfica de Líneas: Tendencia Mensual (Accidentes Totales vs Defunciones) con Escalas Adaptables
      */
     renderTrend() {
         const tagEl = document.getElementById('trend-range-tag');
@@ -278,7 +172,6 @@ const ChartsModule = {
                         display: true,
                         position: 'left',
                         beginAtZero: true,
-                        max: this.baseTrendTotalMax,
                         grid: { color: '#1b2331' },
                         title: { display: true, text: 'Accidentes Totales', color: '#ffd600', font: { size: 10, weight: '500' } },
                         ticks: { color: '#94a3b8' }
@@ -288,7 +181,6 @@ const ChartsModule = {
                         display: true,
                         position: 'right',
                         beginAtZero: true,
-                        max: this.baseTrendFatalMax,
                         grid: { display: false },
                         title: { display: true, text: 'Defunciones', color: '#ff1744', font: { size: 10, weight: '500' } },
                         ticks: { color: '#ff1744' }
@@ -339,24 +231,16 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras: Top Tipos de Incidente Vial con Escala X fija
+     * Gráfica de Barras: Top Tipos de Incidente Vial con Escala Adaptable
      */
     renderTipos() {
         const el = document.getElementById('chart-tipos');
         if (!el) return;
-        if (!this.baselinesReady) this.initBaselines();
 
-        const tiposMap = {};
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
-        const len = dataMod.filteredData.length;
-        for (let i = 0; i < len; i++) {
-            const t = dataMod.filteredData[i].tipo_incidente_vial || 'Sin dato';
-            tiposMap[t] = (tiposMap[t] || 0) + 1;
-        }
-
-        const baseLabels = this.baseTipoLabels || [];
-        const labels = baseLabels.map(t => t.length > 35 ? t.slice(0, 33) + '…' : t);
-        const data = baseLabels.map(t => tiposMap[t] || 0);
+        const tipos = dataMod.getTopTipos();
+        const labels = tipos.map(t => t[0].length > 35 ? t[0].slice(0, 33) + '…' : t[0]);
+        const data = tipos.map(t => t[1]);
 
         if (this.tiposChartInst) {
             this.tiposChartInst.data.labels = labels;
@@ -381,7 +265,7 @@ const ChartsModule = {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { color: '#1b2331' }, beginAtZero: true, max: this.baseTipoMax },
+                    x: { grid: { color: '#1b2331' }, beginAtZero: true },
                     y: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
@@ -394,7 +278,6 @@ const ChartsModule = {
     renderTopColonias() {
         const container = document.getElementById('top-colonias');
         if (!container) return;
-        if (!this.baselinesReady) this.initBaselines();
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
         const top = dataMod.getTopColonias();
@@ -404,10 +287,10 @@ const ChartsModule = {
             return;
         }
 
-        const baseMax = this.baseColoniaMax || 500;
+        const maxVal = top[0][1] || 1;
         let html = '';
         top.forEach(([name, count]) => {
-            const pct = Math.min(100, Math.round((count / baseMax) * 100));
+            const pct = Math.round((count / maxVal) * 100);
             html += `
             <div class="top-row">
                 <span class="name" title="${name}">${name}</span>
@@ -419,12 +302,11 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras: Accidentes por Hora (00 a 23 h) con Escala Y estática
+     * Gráfica de Barras: Accidentes por Hora (00 a 23 h) con Escala Y Adaptable
      */
     renderHoursChart() {
         const el = document.getElementById('chart-hours');
         if (!el) return;
-        if (!this.baselinesReady) this.initBaselines();
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
         const { counts } = dataMod.getClockData();
@@ -499,7 +381,7 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } },
-                        y: { grid: { color: '#1b2331' }, beginAtZero: true, max: this.baseHourMax, ticks: { font: { size: 9.5 } } }
+                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
                     }
                 }
             });
@@ -530,12 +412,11 @@ const ChartsModule = {
     },
 
     /**
-     * Gráfica de Barras: Día de la Semana (Lunes a Domingo) con Escala Y estática
+     * Gráfica de Barras: Día de la Semana (Lunes a Domingo) con Escala Y Adaptable
      */
     renderWeekdaysChart() {
         const el = document.getElementById('chart-weekdays');
         if (!el) return;
-        if (!this.baselinesReady) this.initBaselines();
 
         const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
         const counts = dataMod.getWeekdayData();
@@ -601,7 +482,7 @@ const ChartsModule = {
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        y: { grid: { color: '#1b2331' }, beginAtZero: true, max: this.baseWeekdayMax, ticks: { font: { size: 9.5 } } }
+                        y: { grid: { color: '#1b2331' }, beginAtZero: true, ticks: { font: { size: 9.5 } } }
                     }
                 }
             });
