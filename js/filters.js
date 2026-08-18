@@ -431,10 +431,16 @@ const FiltersModule = {
         }
         // Mobile Toggle para vista responsive
         const btnToggleFilters = document.getElementById('btn-toggle-filters');
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && window.innerWidth < 860) {
+            sidebar.classList.add('collapsed');
+        }
         if (btnToggleFilters) {
             btnToggleFilters.addEventListener('click', () => {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar) sidebar.classList.toggle('collapsed');
+                if (sidebar) {
+                    const isCollapsed = sidebar.classList.toggle('collapsed');
+                    btnToggleFilters.textContent = isCollapsed ? '☰ Filtros' : '✕ Cerrar filtros';
+                }
             });
         }
     }

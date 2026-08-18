@@ -1540,63 +1540,224 @@ footer a {
   display: none;
 }
 
-/* ---------- DISEÑO RESPONSIVO ---------- */
-@media (max-width: 1180px) {
+/* ==============================================================================
+   DISEÑO RESPONSIVO MULTIPLATAFORMA (Desktop, Laptop, Tablet, Móvil)
+   ============================================================================== */
+
+/* 1. Pantallas medianas y Laptops (1024px a 1366px) */
+@media (max-width: 1366px) {
   main.layout {
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr) 340px;
+    gap: 12px;
+    padding: 12px 16px 20px;
   }
 
-  .charts-col {
-    grid-column: 1 / -1;
+  .kpi-value {
+    font-size: 18px;
   }
 
-  .kpis {
-    min-width: 0;
+  .kpi-label {
+    font-size: 9.5px;
+  }
+
+  .kpi {
+    padding: 8px 10px;
   }
 }
 
-@media (max-width: 820px) {
+/* 2. Tablets en horizontal y pantallas compactas (860px a 1080px) */
+@media (max-width: 1080px) {
   main.layout {
-    grid-template-columns: 1fr;
-    padding: 10px 12px 20px;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 12px;
   }
 
-  .sidebar {
-    max-height: none;
-    order: 2;
+  /* Las 4 tarjetas de gráficas se acomodan en un ordenado grid 2x2 abajo */
+  .charts-col {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 
-  .sidebar.collapsed {
-    display: none;
+  .charts-col .drag-item {
+    width: 100%;
+  }
+
+  .top-row {
+    gap: 12px;
+  }
+}
+
+/* 3. Tablets en vertical y Smartphones (Menor a 860px) */
+@media (max-width: 860px) {
+  .top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-brand h1 {
+    font-size: 20px;
+  }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .kpi {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .top-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .filters-toggle {
+    display: inline-flex !important;
+  }
+
+  main.layout {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px 20px;
+    gap: 12px;
   }
 
   .map-col {
     order: 1;
   }
 
+  .sidebar {
+    order: 2;
+    max-height: 420px;
+    background: var(--panel-2);
+    border: 1px solid var(--linea-clara);
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    transition: all 0.25s ease;
+  }
+
+  .sidebar.collapsed {
+    display: none !important;
+  }
+
   .charts-col {
     order: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .kpis {
+  /* Mapa y Barra de herramientas */
+  #map {
+    height: 380px;
+  }
+
+  .map-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .tp-toolbar-wrap {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tp-left {
     width: 100%;
     justify-content: space-between;
+    gap: 4px;
+    flex-wrap: wrap;
   }
 
-  .kpi {
-    flex: 1 1 45%;
-    min-width: 120px;
+  .tp-center {
+    width: 100%;
+    min-width: 0;
   }
 
+  .tp-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .map-toolbar .right-tools {
+    width: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--linea);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+
+  .map-toolbar .right-tools .color-select {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  /* Apilar las gráficas de Horas y Días para que no se aplasten */
+  .clock-panel {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .scrollable-list {
+    max-height: 320px;
+  }
+}
+
+/* 4. Teléfonos móviles compactos (Menor a 480px) */
+@media (max-width: 480px) {
   #map {
-    height: 400px;
-  }
-
-  .filters-toggle {
-    display: inline-flex;
+    height: 320px;
   }
 
   header.top {
-    padding: 10px 14px;
+    padding: 8px 10px;
+  }
+
+  .header-brand h1 {
+    font-size: 18px;
+  }
+
+  .kpi-value {
+    font-size: 16px;
+  }
+
+  .tp-mode-btn {
+    padding: 3px 5px;
+    font-size: 9.5px;
+  }
+
+  .tp-play-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .color-select {
+    font-size: 10px;
+    padding: 4px;
+  }
+
+  .top-row .name {
+    flex: 0 0 110px;
   }
 }
