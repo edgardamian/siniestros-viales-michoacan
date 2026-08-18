@@ -480,6 +480,53 @@ const DataModule = {
     },
 
     /**
+     * Obtiene la matriz cruzada de riesgo temporal: 7 Días de la semana × 24 Horas.
+     * Retorna conteos de siniestros, víctimas fatales y el momento crítico del periodo.
+     */
+    getRiskMatrixData() {
+        const matrix = Array.from({ length: 7 }, () =>
+            Array.from({ length: 24 }, () => ({ count: 0, fatals: 0 }))
+        );
+        const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        const dayMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
+
+        let maxCount = 0;
+        let peakDay = '–';
+        let peakHour = -1;
+        let peakCount = 0;
+        let peakFatals = 0;
+
+        const len = this.filteredData.length;
+        for (let i = 0; i < len; i++) {
+            const d = this.filteredData[i];
+            const rIdx = dayMap[d.wkIdx];
+            const h = Math.floor(Number(d.hora_redondeada));
+            if (rIdx !== undefined && !isNaN(h) && h >= 0 && h < 24) {
+                matrix[rIdx][h].count++;
+                if (d.sevVal === 2) matrix[rIdx][h].fatals++;
+
+                if (matrix[rIdx][h].count > maxCount) {
+                    maxCount = matrix[rIdx][h].count;
+                    peakDay = dayNames[rIdx];
+                    peakHour = h;
+                    peakCount = matrix[rIdx][h].count;
+                    peakFatals = matrix[rIdx][h].fatals;
+                }
+            }
+        }
+
+        return {
+            matrix,
+            maxCount,
+            dayNames,
+            peakDay,
+            peakHour,
+            peakCount,
+            peakFatals
+        };
+    },
+
+    /**
      * Obtiene la distribución horaria completa excluyendo únicamente el filtro de hora
      * para mantener fija la gráfica de horas mientras se anima.
      */

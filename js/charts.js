@@ -89,6 +89,7 @@ const ChartsModule = {
         this.renderTopColonias();
         this.renderHoursChart();
         this.renderWeekdaysChart();
+        this.renderRiskMatrix();
     },
 
     /**
@@ -674,6 +675,81 @@ const ChartsModule = {
                 noteEl.innerHTML = `Pico: <b>${peakDayName}</b> (${maxWkCount.toLocaleString('es-MX')})`;
             }
         }
+    },
+
+    /**
+     * Matriz de Riesgo Temporal (7 Días de la semana × 24 Horas)
+     */
+    renderRiskMatrix() {
+        const container = document.getElementById('risk-matrix-container');
+        if (!container) return;
+
+        const dataMod = (typeof DataModule !== 'undefined' ? DataModule : window.DataModule);
+        if (!dataMod || !dataMod.getRiskMatrixData) return;
+
+        const { matrix, maxCount, dayNames, peakDay, peakHour, peakCount, peakFatals } = dataMod.getRiskMatrixData();
+
+        // Actualizar el texto del pico crítico en la cabecera
+        const peakValEl = document.getElementById('matrix-peak-val');
+        if (peakValEl) {
+            if (peakCount > 0 && peakHour >= 0) {
+                const hStr = `${String(peakHour).padStart(2, '0')}:00 h`;
+                const fatStr = peakFatals > 0 ? ` (${peakFatals.toLocaleString('es-MX')} fatales)` : '';
+                peakValEl.innerHTML = `${peakDay} ${hStr} &nbsp;<span style="color:var(--senial-amarillo);font-weight:600;">[${peakCount.toLocaleString('es-MX')} siniestros${fatStr}]</span>`;
+            } else {
+                peakValEl.textContent = 'Sin datos';
+            }
+        }
+
+        // Generar encabezado de horas (00h a 23h)
+        let html = '<div class="matrix-grid-wrap">';
+        html += '<div class="matrix-header-row"><div class="matrix-day-label-head"></div>';
+        for (let h = 0; h < 24; h++) {
+            const hText = (h % 3 === 0 || h === 23) ? `${h}h` : '';
+            html += `<div class="matrix-hour-col-head">${hText}</div>`;
+        }
+        html += '</div>';
+
+        // Generar las 7 filas (Lunes a Domingo)
+        const dayShort = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        const dayIdxMap = [1, 2, 3, 4, 5, 6, 0]; // row 0=Lun(1), 1=Mar(2), ..., 6=Dom(0)
+
+        for (let r = 0; r < 7; r++) {
+            html += `<div class="matrix-row">`;
+            html += `<div class="matrix-day-label">${dayShort[r]}</div>`;
+
+            for (let c = 0; c < 24; c++) {
+                const cell = matrix[r][c];
+                const count = cell.count;
+                const fatals = cell.fatals;
+                const ratio = maxCount > 0 ? (count / maxCount) : 0;
+
+                // Color según intensidad térmica
+                let bg = 'rgba(255, 255, 255, 0.04)';
+                let glow = '';
+                if (count > 0) {
+                    if (ratio < 0.20) {
+                        bg = `rgba(0, 230, 118, ${0.30 + ratio * 1.5})`;
+                    } else if (ratio < 0.45) {
+                        bg = `rgba(255, 214, 0, ${0.45 + ratio * 0.8})`;
+                    } else if (ratio < 0.75) {
+                        bg = `rgba(255, 106, 0, ${0.65 + ratio * 0.4})`;
+                    } else {
+                        bg = `rgba(255, 23, 68, ${0.85 + ratio * 0.15})`;
+                        glow = 'box-shadow: 0 0 6px rgba(255, 23, 68, 0.5);';
+                    }
+                }
+
+                const tooltip = `${dayNames[r]} a las ${String(c).padStart(2, '0')}:00 h\n• Siniestros: ${count.toLocaleString('es-MX')}${fatals > 0 ? `\n• Fallecidos: ${fatals.toLocaleString('es-MX')}` : ''}`;
+
+                html += `<div class="matrix-cell" style="background:${bg};${glow}" title="${tooltip}" data-day-idx="${dayIdxMap[r]}" data-hour="${c}"></div>`;
+            }
+
+            html += `</div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
     }
 };
 

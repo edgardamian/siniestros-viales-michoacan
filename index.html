@@ -359,6 +359,29 @@
           </div>
         </div>
 
+        <!-- Panel Matriz de Riesgo Temporal (7 Días × 24 Horas) -->
+        <div class="panel drag-item-center" id="matrix-panel" data-drag-id="matrix">
+          <div class="time-chart-header"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+              <h2>Matriz de riesgo temporal <span class="tag">7 Días × 24 Horas</span></h2>
+            </div>
+            <span class="clock-note" id="matrix-peak-note" style="font-size:11px;">
+              Pico crítico: <b id="matrix-peak-val" style="color:var(--senial-rojo);">–</b>
+            </span>
+          </div>
+          <div id="risk-matrix-container" class="risk-matrix-container"></div>
+          <div class="matrix-legend">
+            <span class="legend-title">Concentración de siniestros:</span>
+            <div class="matrix-scale">
+              <span>Baja</span>
+              <div class="scale-bar"></div>
+              <span>Crítica</span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- COLUMNA DERECHA: Gráficos complementarios y Top Colonias Reordenables -->
