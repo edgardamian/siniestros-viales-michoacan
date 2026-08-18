@@ -1236,10 +1236,10 @@ main.layout {
 
 .drag-handle {
   color: var(--niebla-2);
-  font-size: 14px;
+  font-size: 15px;
   cursor: grab;
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
   line-height: 1;
   transition: all 0.15s ease;
   user-select: none;
@@ -1253,7 +1253,11 @@ main.layout {
   color: var(--cono-naranja);
   background: var(--panel-2);
   opacity: 1;
-  transform: scale(1.15);
+  transform: scale(1.12);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .drag-item {

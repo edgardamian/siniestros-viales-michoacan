@@ -38,12 +38,31 @@ const ReorderModule = {
         // 2. Configurar eventos de Drag & Drop
         const items = container.querySelectorAll(itemSelector);
         items.forEach(item => {
-            item.setAttribute('draggable', 'true');
+            const handles = item.querySelectorAll('.drag-handle');
+            let isHandleActive = false;
+
+            handles.forEach(h => {
+                h.addEventListener('mousedown', () => {
+                    isHandleActive = true;
+                    item.setAttribute('draggable', 'true');
+                });
+                h.addEventListener('touchstart', () => {
+                    isHandleActive = true;
+                    item.setAttribute('draggable', 'true');
+                }, { passive: true });
+            });
+
+            const resetHandle = () => {
+                isHandleActive = false;
+                item.removeAttribute('draggable');
+            };
+
+            document.addEventListener('mouseup', resetHandle);
+            document.addEventListener('touchend', resetHandle);
 
             item.addEventListener('dragstart', (e) => {
-                // Prevenir inicio de arrastre si se interactúa con controles interactivos internos
-                const tag = e.target.tagName;
-                if (['INPUT', 'SELECT', 'BUTTON', 'A', 'CANVAS'].includes(tag)) {
+                // Solo permitir arrastrar si la interacción comenzó específicamente en la agarradera
+                if (!isHandleActive) {
                     e.preventDefault();
                     return;
                 }
@@ -54,6 +73,7 @@ const ReorderModule = {
             });
 
             item.addEventListener('dragend', () => {
+                resetHandle();
                 item.classList.remove('is-dragging');
 
                 // Guardar la nueva secuencia de IDs en LocalStorage
