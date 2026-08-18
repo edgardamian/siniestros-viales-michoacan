@@ -29,16 +29,24 @@ dirs.forEach(dir => {
     }
 });
 
-// 2. Copiar base de datos CSV
-const csvSource = path.join(ROOT_DIR, 'data', 'accidentes_limpio_actualizado.csv');
-const csvDest = path.join(PROD_DIR, 'data', 'accidentes_limpio_actualizado.csv');
-if (fs.existsSync(csvSource)) {
-    fs.copyFileSync(csvSource, csvDest);
-    const sizeMb = (fs.statSync(csvDest).size / (1024 * 1024)).toFixed(2);
-    console.log(`✅ Base de datos copiada: data/accidentes_limpio_actualizado.csv (${sizeMb} MB)`);
-} else {
-    console.warn(`⚠️ No se encontró: ${csvSource}`);
-}
+// 2. Copiar archivos de datos (CSV y JSON)
+const dataFiles = [
+    'accidentes_limpio_actualizado.csv',
+    'vehiculos.csv',
+    'muni_bounds.json'
+];
+
+dataFiles.forEach(file => {
+    const src = path.join(ROOT_DIR, 'data', file);
+    const dest = path.join(PROD_DIR, 'data', file);
+    if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        const sizeMb = (fs.statSync(dest).size / (1024 * 1024)).toFixed(2);
+        console.log(`✅ Archivo de datos copiado: data/${file} (${sizeMb} MB)`);
+    } else {
+        console.warn(`⚠️ No se encontró: ${src}`);
+    }
+});
 
 // 3. Minificar CSS
 const cssSource = path.join(ROOT_DIR, 'css', 'style.css');

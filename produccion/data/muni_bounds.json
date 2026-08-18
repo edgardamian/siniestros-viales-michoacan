@@ -1,0 +1,1157 @@
+{
+  "Morelia": {
+    "minLng": -101.48077,
+    "maxLng": -101.08861,
+    "minLat": 19.50038,
+    "maxLat": 19.81058,
+    "count": 50717,
+    "center": [
+      -101.20134,
+      19.69796
+    ]
+  },
+  "Indaparapeo": {
+    "minLng": -101.00193,
+    "maxLng": -100.8932,
+    "minLat": 19.66501,
+    "maxLat": 19.81879,
+    "count": 48,
+    "center": [
+      -100.95759,
+      19.78372
+    ]
+  },
+  "Charo": {
+    "minLng": -101.09601,
+    "maxLng": -100.92402,
+    "minLat": 19.56018,
+    "maxLat": 19.78174,
+    "count": 508,
+    "center": [
+      -101.04212,
+      19.71598
+    ]
+  },
+  "Pátzcuaro": {
+    "minLng": -101.76915,
+    "maxLng": -101.43951,
+    "minLat": 19.41997,
+    "maxLat": 19.55326,
+    "count": 695,
+    "center": [
+      -101.61076,
+      19.51828
+    ]
+  },
+  "Zinapécuaro": {
+    "minLng": -100.9429,
+    "maxLng": -100.60355,
+    "minLat": 19.73968,
+    "maxLat": 19.89817,
+    "count": 98,
+    "center": [
+      -100.81746,
+      19.85457
+    ]
+  },
+  "Tarímbaro": {
+    "minLng": -101.239,
+    "maxLng": -101.06625,
+    "minLat": 19.74458,
+    "maxLat": 19.88394,
+    "count": 976,
+    "center": [
+      -101.16092,
+      19.77138
+    ]
+  },
+  "Tacámbaro": {
+    "minLng": -101.56906,
+    "maxLng": -101.33132,
+    "minLat": 19.11639,
+    "maxLat": 19.40351,
+    "count": 182,
+    "center": [
+      -101.45637,
+      19.24184
+    ]
+  },
+  "Acuitzio": {
+    "minLng": -101.38184,
+    "maxLng": -101.27169,
+    "minLat": 19.41997,
+    "maxLat": 19.52549,
+    "count": 96,
+    "center": [
+      -101.33138,
+      19.48247
+    ]
+  },
+  "Ario": {
+    "minLng": -101.78009,
+    "maxLng": -101.62092,
+    "minLat": 19.02998,
+    "maxLat": 19.29804,
+    "count": 34,
+    "center": [
+      -101.70273,
+      19.19601
+    ]
+  },
+  "Tangancícuaro": {
+    "minLng": -102.40624,
+    "maxLng": -102.18899,
+    "minLat": 19.80275,
+    "maxLat": 19.9621,
+    "count": 39,
+    "center": [
+      -102.22669,
+      19.89586
+    ]
+  },
+  "Sahuayo": {
+    "minLng": -102.75038,
+    "maxLng": -102.70432,
+    "minLat": 20.03776,
+    "maxLat": 20.08494,
+    "count": 99,
+    "center": [
+      -102.7191,
+      20.05738
+    ]
+  },
+  "Múgica": {
+    "minLng": -102.17783,
+    "maxLng": -102.07096,
+    "minLat": 18.95204,
+    "maxLat": 19.07303,
+    "count": 57,
+    "center": [
+      -102.09573,
+      19.02071
+    ]
+  },
+  "Tzintzuntzan": {
+    "minLng": -101.62511,
+    "maxLng": -101.47024,
+    "minLat": 19.56774,
+    "maxLat": 19.6358,
+    "count": 14,
+    "center": [
+      -101.55187,
+      19.622
+    ]
+  },
+  "Apatzingán": {
+    "minLng": -102.57729,
+    "maxLng": -102.3173,
+    "minLat": 18.79707,
+    "maxLat": 19.1485,
+    "count": 390,
+    "center": [
+      -102.35942,
+      19.08882
+    ]
+  },
+  "Lázaro Cárdenas": {
+    "minLng": -102.34241,
+    "maxLng": -102.18095,
+    "minLat": 17.9219,
+    "maxLat": 18.20445,
+    "count": 976,
+    "center": [
+      -102.21123,
+      17.96609
+    ]
+  },
+  "Quiroga": {
+    "minLng": -101.64614,
+    "maxLng": -101.46235,
+    "minLat": 19.64993,
+    "maxLat": 19.7181,
+    "count": 45,
+    "center": [
+      -101.52961,
+      19.66621
+    ]
+  },
+  "Buenavista": {
+    "minLng": -102.61042,
+    "maxLng": -102.47858,
+    "minLat": 19.08126,
+    "maxLat": 19.36661,
+    "count": 30,
+    "center": [
+      -102.55682,
+      19.24289
+    ]
+  },
+  "Tingüindín": {
+    "minLng": -102.54737,
+    "maxLng": -102.41676,
+    "minLat": 19.72746,
+    "maxLat": 19.84939,
+    "count": 23,
+    "center": [
+      -102.48618,
+      19.74989
+    ]
+  },
+  "Nocupétaro": {
+    "minLng": -101.30794,
+    "maxLng": -101.12895,
+    "minLat": 19.02939,
+    "maxLat": 19.18051,
+    "count": 16,
+    "center": [
+      -101.21179,
+      19.05936
+    ]
+  },
+  "Coeneo": {
+    "minLng": -101.70887,
+    "maxLng": -101.52575,
+    "minLat": 19.70796,
+    "maxLat": 19.86242,
+    "count": 95,
+    "center": [
+      -101.61354,
+      19.8059
+    ]
+  },
+  "Jacona": {
+    "minLng": -102.36396,
+    "maxLng": -102.266,
+    "minLat": 19.92818,
+    "maxLat": 19.96863,
+    "count": 45,
+    "center": [
+      -102.32647,
+      19.94257
+    ]
+  },
+  "Puruándiro": {
+    "minLng": -101.62787,
+    "maxLng": -101.41282,
+    "minLat": 20.04928,
+    "maxLat": 20.23263,
+    "count": 121,
+    "center": [
+      -101.51509,
+      20.10048
+    ]
+  },
+  "Carácuaro": {
+    "minLng": -101.1266,
+    "maxLng": -100.95157,
+    "minLat": 18.86679,
+    "maxLat": 19.02421,
+    "count": 7,
+    "center": [
+      -101.04976,
+      18.95511
+    ]
+  },
+  "Tangamandapio": {
+    "minLng": -102.51621,
+    "maxLng": -102.37773,
+    "minLat": 19.81171,
+    "maxLat": 19.96661,
+    "count": 49,
+    "center": [
+      -102.40593,
+      19.91969
+    ]
+  },
+  "Cuitzeo": {
+    "minLng": -101.20185,
+    "maxLng": -101.06189,
+    "minLat": 19.91666,
+    "maxLat": 20.08387,
+    "count": 350,
+    "center": [
+      -101.14205,
+      19.97748
+    ]
+  },
+  "Aguililla": {
+    "minLng": -102.83375,
+    "maxLng": -102.67389,
+    "minLat": 18.73517,
+    "maxLat": 19.0095,
+    "count": 5,
+    "center": [
+      -102.7386,
+      18.91335
+    ]
+  },
+  "Álvaro Obregón": {
+    "minLng": -101.06581,
+    "maxLng": -100.97709,
+    "minLat": 19.79513,
+    "maxLat": 19.89142,
+    "count": 62,
+    "center": [
+      -101.0332,
+      19.83175
+    ]
+  },
+  "Queréndaro": {
+    "minLng": -100.91188,
+    "maxLng": -100.77802,
+    "minLat": 19.63426,
+    "maxLat": 19.81193,
+    "count": 39,
+    "center": [
+      -100.86358,
+      19.78745
+    ]
+  },
+  "Paracho": {
+    "minLng": -102.10947,
+    "maxLng": -102.02342,
+    "minLat": 19.61575,
+    "maxLat": 19.67346,
+    "count": 18,
+    "center": [
+      -102.05526,
+      19.64327
+    ]
+  },
+  "Hidalgo": {
+    "minLng": -100.82394,
+    "maxLng": -100.49678,
+    "minLat": 19.5098,
+    "maxLat": 19.78187,
+    "count": 277,
+    "center": [
+      -100.58536,
+      19.69243
+    ]
+  },
+  "Zacapu": {
+    "minLng": -101.90598,
+    "maxLng": -101.71039,
+    "minLat": 19.76224,
+    "maxLat": 19.89198,
+    "count": 167,
+    "center": [
+      -101.78224,
+      19.81525
+    ]
+  },
+  "Madero": {
+    "minLng": -101.34673,
+    "maxLng": -101.21437,
+    "minLat": 19.24519,
+    "maxLat": 19.42288,
+    "count": 35,
+    "center": [
+      -101.29756,
+      19.38328
+    ]
+  },
+  "Jiménez": {
+    "minLng": -101.81511,
+    "maxLng": -101.57306,
+    "minLat": 19.90179,
+    "maxLat": 19.95428,
+    "count": 9,
+    "center": [
+      -101.74018,
+      19.91908
+    ]
+  },
+  "Purépero": {
+    "minLng": -102.02625,
+    "maxLng": -101.9696,
+    "minLat": 19.84701,
+    "maxLat": 19.97464,
+    "count": 22,
+    "center": [
+      -102.00209,
+      19.90438
+    ]
+  },
+  "Penjamillo": {
+    "minLng": -101.9381,
+    "maxLng": -101.85612,
+    "minLat": 20.09181,
+    "maxLat": 20.13708,
+    "count": 9,
+    "center": [
+      -101.91981,
+      20.11526
+    ]
+  },
+  "Santa Ana Maya": {
+    "minLng": -101.119,
+    "maxLng": -100.9801,
+    "minLat": 19.98988,
+    "maxLat": 20.07076,
+    "count": 52,
+    "center": [
+      -101.0355,
+      20.02142
+    ]
+  },
+  "Sin datos": {
+    "minLng": -104.85352,
+    "maxLng": -97.24734,
+    "minLat": 15.67096,
+    "maxLat": 21.01642,
+    "count": 39,
+    "center": [
+      -101.36851,
+      19.30888
+    ]
+  },
+  "Numarán": {
+    "minLng": -101.96879,
+    "maxLng": -101.96879,
+    "minLat": 20.2814,
+    "maxLat": 20.2814,
+    "count": 1,
+    "center": [
+      -101.96879,
+      20.2814
+    ]
+  },
+  "Lagunillas": {
+    "minLng": -101.4481,
+    "maxLng": -101.39435,
+    "minLat": 19.55639,
+    "maxLat": 19.63087,
+    "count": 34,
+    "center": [
+      -101.41997,
+      19.57257
+    ]
+  },
+  "La Piedad": {
+    "minLng": -102.03685,
+    "maxLng": -102.0233,
+    "minLat": 20.31247,
+    "maxLat": 20.35295,
+    "count": 5,
+    "center": [
+      -102.02878,
+      20.33704
+    ]
+  },
+  "Gabriel Zamora": {
+    "minLng": -102.07393,
+    "maxLng": -101.99776,
+    "minLat": 19.06764,
+    "maxLat": 19.27307,
+    "count": 69,
+    "center": [
+      -102.05397,
+      19.16245
+    ]
+  },
+  "Huandacareo": {
+    "minLng": -101.32853,
+    "maxLng": -101.20823,
+    "minLat": 19.96188,
+    "maxLat": 20.01496,
+    "count": 94,
+    "center": [
+      -101.27112,
+      19.98318
+    ]
+  },
+  "José Sixto Verduzco": {
+    "minLng": -101.61913,
+    "maxLng": -101.53163,
+    "minLat": 20.1933,
+    "maxLat": 20.31621,
+    "count": 7,
+    "center": [
+      -101.59446,
+      20.27583
+    ]
+  },
+  "Uruapan": {
+    "minLng": -102.31217,
+    "maxLng": -101.98686,
+    "minLat": 19.2753,
+    "maxLat": 19.61559,
+    "count": 67,
+    "center": [
+      -102.10358,
+      19.45448
+    ]
+  },
+  "Chavinda": {
+    "minLng": -102.46071,
+    "maxLng": -102.46071,
+    "minLat": 20.0097,
+    "maxLat": 20.0097,
+    "count": 1,
+    "center": [
+      -102.46071,
+      20.0097
+    ]
+  },
+  "Maravatío": {
+    "minLng": -100.58095,
+    "maxLng": -100.24793,
+    "minLat": 19.78716,
+    "maxLat": 19.98666,
+    "count": 70,
+    "center": [
+      -100.42686,
+      19.87575
+    ]
+  },
+  "Ziracuaretiro": {
+    "minLng": -101.9481,
+    "maxLng": -101.90545,
+    "minLat": 19.37794,
+    "maxLat": 19.47541,
+    "count": 6,
+    "center": [
+      -101.92854,
+      19.44847
+    ]
+  },
+  "Copándaro": {
+    "minLng": -101.26892,
+    "maxLng": -101.13802,
+    "minLat": 19.88021,
+    "maxLat": 19.9642,
+    "count": 53,
+    "center": [
+      -101.19461,
+      19.90237
+    ]
+  },
+  "Chucándiro": {
+    "minLng": -101.3366,
+    "maxLng": -101.29455,
+    "minLat": 19.89194,
+    "maxLat": 19.94757,
+    "count": 17,
+    "center": [
+      -101.32272,
+      19.90692
+    ]
+  },
+  "Arteaga": {
+    "minLng": -102.59617,
+    "maxLng": -102.28149,
+    "minLat": 18.28934,
+    "maxLat": 18.37208,
+    "count": 14,
+    "center": [
+      -102.31464,
+      18.35237
+    ]
+  },
+  "Turicato": {
+    "minLng": -101.42709,
+    "maxLng": -101.42292,
+    "minLat": 19.05414,
+    "maxLat": 19.07115,
+    "count": 3,
+    "center": [
+      -101.42472,
+      19.06123
+    ]
+  },
+  "Erongarícuaro": {
+    "minLng": -101.75786,
+    "maxLng": -101.67714,
+    "minLat": 19.53259,
+    "maxLat": 19.6092,
+    "count": 30,
+    "center": [
+      -101.71602,
+      19.57785
+    ]
+  },
+  "Tumbiscatío": {
+    "minLng": -102.37627,
+    "maxLng": -102.37627,
+    "minLat": 18.52422,
+    "maxLat": 18.52422,
+    "count": 1,
+    "center": [
+      -102.37627,
+      18.52422
+    ]
+  },
+  "Tuxpan": {
+    "minLng": -100.51277,
+    "maxLng": -100.40469,
+    "minLat": 19.51368,
+    "maxLat": 19.63685,
+    "count": 117,
+    "center": [
+      -100.46974,
+      19.57358
+    ]
+  },
+  "Juárez": {
+    "minLng": -100.48484,
+    "maxLng": -100.40044,
+    "minLat": 19.26101,
+    "maxLat": 19.34054,
+    "count": 37,
+    "center": [
+      -100.42719,
+      19.31279
+    ]
+  },
+  "Jungapeo": {
+    "minLng": -100.49734,
+    "maxLng": -100.43574,
+    "minLat": 19.43973,
+    "maxLat": 19.50511,
+    "count": 37,
+    "center": [
+      -100.47149,
+      19.4772
+    ]
+  },
+  "Cojumatlán de Régules": {
+    "minLng": -102.85352,
+    "maxLng": -102.83941,
+    "minLat": 20.11429,
+    "maxLat": 20.1148,
+    "count": 2,
+    "center": [
+      -102.84647,
+      20.11455
+    ]
+  },
+  "Zitácuaro": {
+    "minLng": -100.45713,
+    "maxLng": -100.20042,
+    "minLat": 19.32115,
+    "maxLat": 19.52776,
+    "count": 159,
+    "center": [
+      -100.34481,
+      19.45302
+    ]
+  },
+  "Panindícuaro": {
+    "minLng": -101.76082,
+    "maxLng": -101.72842,
+    "minLat": 19.95879,
+    "maxLat": 20.00497,
+    "count": 6,
+    "center": [
+      -101.75113,
+      19.97871
+    ]
+  },
+  "Tiquicheo de Nicolás Romero": {
+    "minLng": -100.96436,
+    "maxLng": -100.73716,
+    "minLat": 18.89646,
+    "maxLat": 19.12441,
+    "count": 10,
+    "center": [
+      -100.79901,
+      18.96628
+    ]
+  },
+  "Jiquilpan": {
+    "minLng": -102.71547,
+    "maxLng": -102.70907,
+    "minLat": 20.00884,
+    "maxLat": 20.0144,
+    "count": 2,
+    "center": [
+      -102.71227,
+      20.01162
+    ]
+  },
+  "Angangueo": {
+    "minLng": -100.33868,
+    "maxLng": -100.27142,
+    "minLat": 19.6096,
+    "maxLat": 19.65623,
+    "count": 12,
+    "center": [
+      -100.30409,
+      19.62303
+    ]
+  },
+  "Irimbo": {
+    "minLng": -100.5041,
+    "maxLng": -100.42933,
+    "minLat": 19.68603,
+    "maxLat": 19.75943,
+    "count": 42,
+    "center": [
+      -100.48013,
+      19.7052
+    ]
+  },
+  "Susupuato": {
+    "minLng": -100.4381,
+    "maxLng": -100.35616,
+    "minLat": 19.23782,
+    "maxLat": 19.29057,
+    "count": 3,
+    "center": [
+      -100.41025,
+      19.26071
+    ]
+  },
+  "Tuzantla": {
+    "minLng": -100.65865,
+    "maxLng": -100.49403,
+    "minLat": 19.09775,
+    "maxLat": 19.28504,
+    "count": 19,
+    "center": [
+      -100.58638,
+      19.20312
+    ]
+  },
+  "Los Reyes": {
+    "minLng": -102.52956,
+    "maxLng": -102.2706,
+    "minLat": 19.54583,
+    "maxLat": 19.77692,
+    "count": 172,
+    "center": [
+      -102.44885,
+      19.59747
+    ]
+  },
+  "Pajacuarán": {
+    "minLng": -102.56639,
+    "maxLng": -102.51669,
+    "minLat": 20.10664,
+    "maxLat": 20.13341,
+    "count": 9,
+    "center": [
+      -102.54809,
+      20.11616
+    ]
+  },
+  "Tzitzio": {
+    "minLng": -101.08246,
+    "maxLng": -100.79683,
+    "minLat": 19.25847,
+    "maxLat": 19.60117,
+    "count": 77,
+    "center": [
+      -100.91515,
+      19.5098
+    ]
+  },
+  "Ocampo": {
+    "minLng": -100.39839,
+    "maxLng": -100.27672,
+    "minLat": 19.5695,
+    "maxLat": 19.62092,
+    "count": 4,
+    "center": [
+      -100.33987,
+      19.59674
+    ]
+  },
+  "Huiramba": {
+    "minLng": -101.48346,
+    "maxLng": -101.42956,
+    "minLat": 19.48884,
+    "maxLat": 19.54976,
+    "count": 7,
+    "center": [
+      -101.44565,
+      19.52725
+    ]
+  },
+  "Venustiano Carranza": {
+    "minLng": -102.67056,
+    "maxLng": -102.59382,
+    "minLat": 20.10548,
+    "maxLat": 20.19452,
+    "count": 13,
+    "center": [
+      -102.63849,
+      20.13473
+    ]
+  },
+  "Tlalpujahua": {
+    "minLng": -100.23926,
+    "maxLng": -100.16155,
+    "minLat": 19.75548,
+    "maxLat": 19.83228,
+    "count": 21,
+    "center": [
+      -100.18782,
+      19.79588
+    ]
+  },
+  "Parácuaro": {
+    "minLng": -102.27423,
+    "maxLng": -102.11105,
+    "minLat": 19.01795,
+    "maxLat": 19.17241,
+    "count": 7,
+    "center": [
+      -102.21504,
+      19.09612
+    ]
+  },
+  "Senguio": {
+    "minLng": -100.41667,
+    "maxLng": -100.28908,
+    "minLat": 19.7318,
+    "maxLat": 19.8127,
+    "count": 16,
+    "center": [
+      -100.34923,
+      19.76393
+    ]
+  },
+  "Coahuayana": {
+    "minLng": -103.59176,
+    "maxLng": -103.59176,
+    "minLat": 18.85591,
+    "maxLat": 18.85591,
+    "count": 1,
+    "center": [
+      -103.59176,
+      18.85591
+    ]
+  },
+  "Zamora": {
+    "minLng": -102.38022,
+    "maxLng": -102.23496,
+    "minLat": 19.94963,
+    "maxLat": 20.07768,
+    "count": 66,
+    "center": [
+      -102.27947,
+      19.998
+    ]
+  },
+  "Vista Hermosa": {
+    "minLng": -102.47714,
+    "maxLng": -102.46404,
+    "minLat": 20.26633,
+    "maxLat": 20.28917,
+    "count": 4,
+    "center": [
+      -102.46851,
+      20.27418
+    ]
+  },
+  "Contepec": {
+    "minLng": -100.28162,
+    "maxLng": -100.12343,
+    "minLat": 19.86114,
+    "maxLat": 19.98127,
+    "count": 21,
+    "center": [
+      -100.18634,
+      19.93595
+    ]
+  },
+  "Coalcomán de Vázquez Pallares": {
+    "minLng": -103.24375,
+    "maxLng": -103.09177,
+    "minLat": 18.38749,
+    "maxLat": 18.92555,
+    "count": 20,
+    "center": [
+      -103.16073,
+      18.7737
+    ]
+  },
+  "Peribán": {
+    "minLng": -102.4885,
+    "maxLng": -102.3499,
+    "minLat": 19.44536,
+    "maxLat": 19.57034,
+    "count": 358,
+    "center": [
+      -102.44173,
+      19.54228
+    ]
+  },
+  "Aquila": {
+    "minLng": -103.50432,
+    "maxLng": -103.41115,
+    "minLat": 18.3362,
+    "maxLat": 18.56292,
+    "count": 2,
+    "center": [
+      -103.45774,
+      18.44956
+    ]
+  },
+  "Tlazazalca": {
+    "minLng": -102.07295,
+    "maxLng": -102.05518,
+    "minLat": 19.95216,
+    "maxLat": 19.97176,
+    "count": 3,
+    "center": [
+      -102.06159,
+      19.9619
+    ]
+  },
+  "Cotija": {
+    "minLng": -102.808,
+    "maxLng": -102.59409,
+    "minLat": 19.75004,
+    "maxLat": 19.82986,
+    "count": 15,
+    "center": [
+      -102.6724,
+      19.79344
+    ]
+  },
+  "Ixtlán": {
+    "minLng": -102.41659,
+    "maxLng": -102.36001,
+    "minLat": 20.10647,
+    "maxLat": 20.17337,
+    "count": 7,
+    "center": [
+      -102.39553,
+      20.1577
+    ]
+  },
+  "Epitacio Huerta": {
+    "minLng": -100.30618,
+    "maxLng": -100.20405,
+    "minLat": 20.07546,
+    "maxLat": 20.17333,
+    "count": 8,
+    "center": [
+      -100.27442,
+      20.13713
+    ]
+  },
+  "Tocumbo": {
+    "minLng": -102.56425,
+    "maxLng": -102.46424,
+    "minLat": 19.61921,
+    "maxLat": 19.75269,
+    "count": 74,
+    "center": [
+      -102.50622,
+      19.68504
+    ]
+  },
+  "Tepalcatepec": {
+    "minLng": -102.8395,
+    "maxLng": -102.8395,
+    "minLat": 19.19766,
+    "maxLat": 19.19766,
+    "count": 1,
+    "center": [
+      -102.8395,
+      19.19766
+    ]
+  },
+  "Chinicuila": {
+    "minLng": -103.30111,
+    "maxLng": -103.28714,
+    "minLat": 18.71417,
+    "maxLat": 18.72806,
+    "count": 2,
+    "center": [
+      -103.29412,
+      18.72111
+    ]
+  },
+  "Morelos": {
+    "minLng": -101.46675,
+    "maxLng": -101.34092,
+    "minLat": 19.98022,
+    "maxLat": 20.00271,
+    "count": 5,
+    "center": [
+      -101.40463,
+      19.99631
+    ]
+  },
+  "Salvador Escalante": {
+    "minLng": -101.80206,
+    "maxLng": -101.51893,
+    "minLat": 19.32874,
+    "maxLat": 19.45869,
+    "count": 78,
+    "center": [
+      -101.62718,
+      19.40537
+    ]
+  },
+  "Huetamo": {
+    "minLng": -100.95793,
+    "maxLng": -100.8638,
+    "minLat": 18.56211,
+    "maxLat": 18.65454,
+    "count": 14,
+    "center": [
+      -100.90416,
+      18.62525
+    ]
+  },
+  "Chilchota": {
+    "minLng": -102.14916,
+    "maxLng": -102.01884,
+    "minLat": 19.77006,
+    "maxLat": 19.85524,
+    "count": 4,
+    "center": [
+      -102.08486,
+      19.8203
+    ]
+  },
+  "Nuevo Parangaricutiro": {
+    "minLng": -102.11183,
+    "maxLng": -102.10783,
+    "minLat": 19.39952,
+    "maxLat": 19.40609,
+    "count": 3,
+    "center": [
+      -102.10942,
+      19.40215
+    ]
+  },
+  "Ecuandureo": {
+    "minLng": -102.26268,
+    "maxLng": -102.18744,
+    "minLat": 20.10821,
+    "maxLat": 20.18073,
+    "count": 4,
+    "center": [
+      -102.20745,
+      20.16002
+    ]
+  },
+  "Huaniqueo": {
+    "minLng": -101.56686,
+    "maxLng": -101.46962,
+    "minLat": 19.82793,
+    "maxLat": 19.90007,
+    "count": 17,
+    "center": [
+      -101.51736,
+      19.88274
+    ]
+  },
+  "Nuevo Urecho": {
+    "minLng": -101.90831,
+    "maxLng": -101.81743,
+    "minLat": 19.1645,
+    "maxLat": 19.2712,
+    "count": 8,
+    "center": [
+      -101.87837,
+      19.1993
+    ]
+  },
+  "Briseñas": {
+    "minLng": -102.56101,
+    "maxLng": -102.56101,
+    "minLat": 20.268,
+    "maxLat": 20.268,
+    "count": 1,
+    "center": [
+      -102.56101,
+      20.268
+    ]
+  },
+  "Villamar": {
+    "minLng": -102.59547,
+    "maxLng": -102.52349,
+    "minLat": 20.01508,
+    "maxLat": 20.04404,
+    "count": 4,
+    "center": [
+      -102.55438,
+      20.02643
+    ]
+  },
+  "Zináparo": {
+    "minLng": -102.00119,
+    "maxLng": -101.98965,
+    "minLat": 20.1426,
+    "maxLat": 20.16937,
+    "count": 2,
+    "center": [
+      -101.99542,
+      20.15598
+    ]
+  },
+  "Angamacutiro": {
+    "minLng": -101.71525,
+    "maxLng": -101.687,
+    "minLat": 20.07999,
+    "maxLat": 20.15341,
+    "count": 4,
+    "center": [
+      -101.70075,
+      20.10534
+    ]
+  },
+  "Tancítaro": {
+    "minLng": -102.48245,
+    "maxLng": -102.38211,
+    "minLat": 19.3599,
+    "maxLat": 19.43858,
+    "count": 7,
+    "center": [
+      -102.42112,
+      19.39092
+    ]
+  },
+  "Charapan": {
+    "minLng": -102.27111,
+    "maxLng": -102.22435,
+    "minLat": 19.64655,
+    "maxLat": 19.7265,
+    "count": 3,
+    "center": [
+      -102.24436,
+      19.67885
+    ]
+  },
+  "Áporo": {
+    "minLng": -100.39194,
+    "maxLng": -100.37293,
+    "minLat": 19.65198,
+    "maxLat": 19.65929,
+    "count": 4,
+    "center": [
+      -100.38266,
+      19.65533
+    ]
+  },
+  "Marcos Castellanos": {
+    "minLng": -103.02309,
+    "maxLng": -102.89842,
+    "minLat": 19.98686,
+    "maxLat": 20.05325,
+    "count": 3,
+    "center": [
+      -102.97524,
+      20.01536
+    ]
+  },
+  "Taretan": {
+    "minLng": -101.95798,
+    "maxLng": -101.95798,
+    "minLat": 19.32831,
+    "maxLat": 19.32831,
+    "count": 1,
+    "center": [
+      -101.95798,
+      19.32831
+    ]
+  }
+}
