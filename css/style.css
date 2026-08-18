@@ -665,44 +665,104 @@ main.layout {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--linea);
   flex-wrap: wrap;
+  background: var(--concreto);
 }
 
-.map-toolbar .left-tools,
+.tp-toolbar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 320px;
+}
+
 .map-toolbar .right-tools {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.tool-btn {
+/* ---------- BOTONES FLOTANTES SOBRE EL MAPA (LADO IZQUIERDO) ---------- */
+.map-floating-tools {
+  position: absolute;
+  top: 105px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.map-floating-tools .tool-group {
+  display: flex;
+  flex-direction: column;
   background: var(--panel-2);
   border: 1px solid var(--linea);
-  color: var(--niebla);
-  width: 34px;
-  height: 34px;
   border-radius: var(--radius-sm);
+  overflow: visible;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.map-floating-tools .tool-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--linea);
+  color: var(--niebla);
+  width: 29px;
+  height: 29px;
+  border-radius: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
-  transition: all .15s;
-}
-
-.tool-btn.active {
-  background: var(--cono-naranja);
-  border-color: var(--cono-naranja);
-  color: #0b0e14;
+  font-size: 13px;
   font-weight: 700;
+  transition: all .15s ease;
+  padding: 0;
 }
 
-.tool-btn:hover {
-  border-color: var(--cono-naranja);
-  color: var(--hueso);
+.map-floating-tools .tool-btn:last-child {
+  border-bottom: none;
+}
+
+.map-floating-tools .tool-btn:hover {
+  background: var(--panel-3);
+  color: var(--cono-naranja);
+}
+
+.map-floating-tools .tool-btn.active {
+  background: var(--cono-naranja);
+  color: #0b0e14;
+}
+
+.map-floating-tools .opacity-control-wrap {
+  position: relative;
+}
+
+.map-floating-tools .opacity-popover {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: calc(100% + 8px);
+  background: var(--concreto);
+  border: 1px solid var(--linea-clara);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  width: 165px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-floating-tools .opacity-popover.show {
+  display: flex;
 }
 
 .color-select {
@@ -710,8 +770,8 @@ main.layout {
   border: 1px solid var(--linea);
   color: var(--hueso);
   border-radius: var(--radius-sm);
-  padding: 7px 8px;
-  font-size: 11.5px;
+  padding: 5px 7px;
+  font-size: 11px;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
 }
@@ -724,31 +784,6 @@ main.layout {
 }
 
 /* ---------- CONTROL DE OPACIDAD POPOVER ---------- */
-.opacity-control-wrap {
-  position: relative;
-  display: inline-flex;
-}
-
-.opacity-popover {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  background: var(--concreto);
-  border: 1px solid var(--linea-clara);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  width: 175px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.opacity-popover.show {
-  display: flex;
-}
-
 .opacity-header {
   display: flex;
   justify-content: space-between;

@@ -121,56 +121,50 @@
       <!-- COLUMNA CENTRAL: Mapa Interactivo, Distribución Temporal y Tendencia -->
       <div class="map-col">
 
-        <!-- Mapa de Leaflet con Barra de Herramientas de Dibujo -->
+        <!-- Mapa de MapLibre GL con Barra de Herramientas y Reproductor Integrado -->
         <div class="panel map-panel">
           <div class="map-toolbar">
-            <div class="left-tools">
-              <button class="tool-btn" id="tool-rect" title="Selección rectangular">▭</button>
-              <button class="tool-btn" id="tool-circle" title="Selección radial">◎</button>
-              <button class="tool-btn" id="tool-poly" title="Selección poligonal">⬡</button>
-              <button class="tool-btn" id="tool-clear" title="Limpiar selección de mapa">✕</button>
-              <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación)">3D</button>
-              <button class="tool-btn" id="tool-buildings" title="Activar / Ocultar Edificios 3D">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                  <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-              </button>
-
-              <!-- Control de Opacidad / Transparencia -->
-              <div class="opacity-control-wrap" id="opacity-control-wrap">
-                <button class="tool-btn" id="tool-opacity" title="Ajustar transparencia de capas">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+            <!-- Barra de Reproducción Temporal (Time-Lapse Player Integrado) -->
+            <div class="tp-toolbar-wrap" id="time-player-panel">
+              <div class="tp-left">
+                <button type="button" class="tp-btn tp-play-btn" id="tp-play-btn"
+                  title="Reproducir animación en lapso de tiempo">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
+                  <span>Reproducir</span>
                 </button>
-                <div class="opacity-popover" id="opacity-popover">
-                  <div class="opacity-header">
-                    <span>Opacidad</span>
-                    <b id="opacity-val-text">85%</b>
-                  </div>
-                  <input type="range" id="layer-opacity-slider" min="15" max="100" value="85" step="5">
+                <div class="tp-btn-group">
+                  <button type="button" class="tp-icon-btn" id="tp-prev-btn" title="Paso anterior">◀</button>
+                  <button type="button" class="tp-icon-btn" id="tp-next-btn" title="Siguiente paso">▶</button>
+                  <button type="button" class="tp-icon-btn" id="tp-reset-btn" title="Restablecer todos los datos">↺</button>
+                </div>
+                <div class="tp-mode-group">
+                  <button type="button" class="tp-mode-btn active" data-mode="hour">⏰ Horas</button>
+                  <button type="button" class="tp-mode-btn" data-mode="weekday">📅 Días</button>
+                  <button type="button" class="tp-mode-btn" data-mode="month">📈 Meses</button>
                 </div>
               </div>
 
-              <!-- Botón Pantalla Completa -->
-              <button class="tool-btn" id="tool-fullscreen" title="Pantalla completa">
-                <svg id="fs-icon-expand" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                  <path
-                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                </svg>
-                <svg id="fs-icon-compress" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                  style="pointer-events:none; display:none;">
-                  <path
-                    d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                </svg>
-              </button>
+              <div class="tp-center">
+                <div class="tp-status-row">
+                  <span class="tp-current-label" id="tp-current-label">⏰ 00:00 h</span>
+                  <span class="tp-count-badge" id="tp-count-badge">55,052 acc.</span>
+                </div>
+                <input type="range" class="tp-scrubber" id="tp-scrubber" min="0" max="23" value="0" step="1">
+              </div>
+
+              <div class="tp-right">
+                <label class="tp-speed-label">Vel.:</label>
+                <select class="tp-speed-select" id="tp-speed-select">
+                  <option value="0.5">0.5x</option>
+                  <option value="1" selected>1.0x</option>
+                  <option value="2">2.0x</option>
+                </select>
+              </div>
             </div>
+
+            <!-- Selectores de Cartografía Base y Visualización -->
             <div class="right-tools">
               <label style="font-size:11px;color:var(--niebla);font-weight:600;">Mapa</label>
               <select class="color-select" id="basemap-mode">
@@ -179,12 +173,12 @@
                 <option value="bw">Blanco y Negro</option>
                 <option value="satellite">Satélite</option>
               </select>
-              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:8px;">Vista</label>
+              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:4px;">Vista</label>
               <select class="color-select" id="layer-mode">
                 <option value="heat" selected>Calor</option>
                 <option value="cluster">Puntos</option>
               </select>
-              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:8px;">Color</label>
+              <label style="font-size:11px;color:var(--niebla);font-weight:600;margin-left:4px;">Color</label>
               <select class="color-select" id="color-mode">
                 <option value="sev">Severidad</option>
                 <option value="vehiculo">Tipo de vehículo</option>
@@ -192,57 +186,73 @@
               </select>
             </div>
           </div>
-          <div id="map"></div>
-          <div class="draw-hint" id="draw-hint">
-            <span id="draw-hint-text">Toca el mapa para comenzar a dibujar</span>
-            <button id="draw-finish-btn" style="display:none;">✓ Terminar</button>
-            <button id="draw-cancel-btn">✕ Cancelar</button>
-          </div>
-          <div class="selection-badge" id="selection-badge">
-            <span id="selection-text">Filtro espacial activo</span>
-            <button id="selection-clear-x">✕</button>
+
+          <!-- Contenedor del Mapa con Botones Flotantes en el Lado Izquierdo -->
+          <div style="position:relative; width:100%; flex:1;">
+            <div id="map"></div>
+
+            <!-- Botones Flotantes de Selección Espacial, 3D, Opacidad y Pantalla Completa -->
+            <div class="map-floating-tools">
+              <div class="tool-group">
+                <button class="tool-btn" id="tool-rect" title="Selección rectangular">▭</button>
+                <button class="tool-btn" id="tool-circle" title="Selección radial">◎</button>
+                <button class="tool-btn" id="tool-poly" title="Selección poligonal">⬡</button>
+                <button class="tool-btn" id="tool-clear" title="Limpiar selección de mapa">✕</button>
+              </div>
+              <div class="tool-group">
+                <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación)">3D</button>
+                <button class="tool-btn" id="tool-buildings" title="Activar / Ocultar Edificios 3D">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                    <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                </button>
+                <!-- Control de Opacidad / Transparencia -->
+                <div class="opacity-control-wrap" id="opacity-control-wrap">
+                  <button class="tool-btn" id="tool-opacity" title="Ajustar transparencia de capas">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+                    </svg>
+                  </button>
+                  <div class="opacity-popover" id="opacity-popover">
+                    <div class="opacity-header">
+                      <span>Opacidad</span>
+                      <b id="opacity-val-text">85%</b>
+                    </div>
+                    <input type="range" id="layer-opacity-slider" min="15" max="100" value="85" step="5">
+                  </div>
+                </div>
+                <!-- Botón Pantalla Completa -->
+                <button class="tool-btn" id="tool-fullscreen" title="Pantalla completa">
+                  <svg id="fs-icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+                    <path
+                      d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </svg>
+                  <svg id="fs-icon-compress" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                    style="pointer-events:none; display:none;">
+                    <path
+                      d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="draw-hint" id="draw-hint">
+              <span id="draw-hint-text">Toca el mapa para comenzar a dibujar</span>
+              <button id="draw-finish-btn" style="display:none;">✓ Terminar</button>
+              <button id="draw-cancel-btn">✕ Cancelar</button>
+            </div>
+            <div class="selection-badge" id="selection-badge">
+              <span id="selection-text">Filtro espacial activo</span>
+              <button id="selection-clear-x">✕</button>
+            </div>
           </div>
           <div class="map-legend" id="map-legend"></div>
-        </div>
-
-        <!-- Barra de Reproducción Temporal (Time-Lapse Player) -->
-        <div class="panel time-player-panel" id="time-player-panel">
-          <div class="tp-left">
-            <button type="button" class="tp-btn tp-play-btn" id="tp-play-btn"
-              title="Reproducir animación en lapso de tiempo">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              <span>Reproducir</span>
-            </button>
-            <div class="tp-btn-group">
-              <button type="button" class="tp-icon-btn" id="tp-prev-btn" title="Paso anterior">◀</button>
-              <button type="button" class="tp-icon-btn" id="tp-next-btn" title="Siguiente paso">▶</button>
-              <button type="button" class="tp-icon-btn" id="tp-reset-btn" title="Restablecer todos los datos">↺</button>
-            </div>
-            <div class="tp-mode-group">
-              <button type="button" class="tp-mode-btn active" data-mode="hour">⏰ Horas</button>
-              <button type="button" class="tp-mode-btn" data-mode="weekday">📅 Días</button>
-              <button type="button" class="tp-mode-btn" data-mode="month">📈 Meses</button>
-            </div>
-          </div>
-
-          <div class="tp-center">
-            <div class="tp-status-row">
-              <span class="tp-current-label" id="tp-current-label">⏰ 00:00 h</span>
-              <span class="tp-count-badge" id="tp-count-badge">58,503 acc.</span>
-            </div>
-            <input type="range" class="tp-scrubber" id="tp-scrubber" min="0" max="23" value="0" step="1">
-          </div>
-
-          <div class="tp-right">
-            <label class="tp-speed-label">Velocidad:</label>
-            <select class="tp-speed-select" id="tp-speed-select">
-              <option value="0.5">0.5x</option>
-              <option value="1" selected>1.0x</option>
-              <option value="2">2.0x</option>
-            </select>
-          </div>
         </div>
 
         <!-- Panel Doble: Accidentes por Hora y Día de la Semana -->
