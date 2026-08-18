@@ -180,6 +180,14 @@ const ChartsModule = {
             chartData = dataMod.groupByMonthAndFatalities();
         }
 
+        const validTotals = chartData.totals.filter(v => v !== null && v !== undefined);
+        const maxTot = validTotals.length > 0 ? Math.max(1, ...validTotals) : 1;
+        const contextTrendTotMax = Math.max(2, Math.ceil(maxTot * 1.15));
+
+        const validFatals = chartData.fatals.filter(v => v !== null && v !== undefined);
+        const maxFat = validFatals.length > 0 ? Math.max(1, ...validFatals) : 1;
+        const contextTrendFatMax = Math.max(2, Math.ceil(maxFat * 1.15));
+
         const activeIdx = (chartData.activeIdx !== undefined ? chartData.activeIdx : -1);
         const pointRadiusTot = isMonthAnimation
             ? (ctx) => (ctx.dataIndex === activeIdx ? 6 : 0)
@@ -198,8 +206,8 @@ const ChartsModule = {
             this.trendChartInst.data.datasets[1].pointBackgroundColor = '#ff1744';
 
             if (isMonthAnimation) {
-                this.trendChartInst.options.scales.y.max = this.baseTrendTotalMax;
-                this.trendChartInst.options.scales.y2.max = this.baseTrendFatalMax;
+                this.trendChartInst.options.scales.y.max = contextTrendTotMax;
+                this.trendChartInst.options.scales.y2.max = contextTrendFatMax;
             } else {
                 delete this.trendChartInst.options.scales.y.max;
                 delete this.trendChartInst.options.scales.y2.max;
@@ -254,7 +262,7 @@ const ChartsModule = {
                         display: true,
                         position: 'left',
                         beginAtZero: true,
-                        max: isMonthAnimation ? this.baseTrendTotalMax : undefined,
+                        max: isMonthAnimation ? contextTrendTotMax : undefined,
                         grid: { color: '#1b2331' },
                         title: { display: true, text: 'Accidentes Totales', color: '#ffd600', font: { size: 10, weight: '500' } },
                         ticks: { color: '#94a3b8' }
@@ -264,7 +272,7 @@ const ChartsModule = {
                         display: true,
                         position: 'right',
                         beginAtZero: true,
-                        max: isMonthAnimation ? this.baseTrendFatalMax : undefined,
+                        max: isMonthAnimation ? contextTrendFatMax : undefined,
                         grid: { display: false },
                         title: { display: true, text: 'Defunciones', color: '#ff1744', font: { size: 10, weight: '500' } },
                         ticks: { color: '#ff1744' }
@@ -428,6 +436,7 @@ const ChartsModule = {
         const maxC = Math.max(1, ...counts);
         const peakHour = counts.indexOf(maxC);
         const labels = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+        const contextHourMax = Math.max(2, Math.ceil(maxC * 1.15));
 
         const bgColors = counts.map((c, i) => {
             if (isHourFiltered) {
@@ -443,9 +452,9 @@ const ChartsModule = {
             this.hoursChartInst.data.datasets[0].data = counts;
             this.hoursChartInst.data.datasets[0].backgroundColor = bgColors;
 
-            // Fijar eje Y si está en modo Horas; adaptar dinámicamente en modo Días/Meses
+            // Fijar eje Y al volumen del contexto activo si está en modo Horas; adaptar dinámicamente en modo Días/Meses
             if (isHourMode) {
-                this.hoursChartInst.options.scales.y.max = this.baseHourMax;
+                this.hoursChartInst.options.scales.y.max = contextHourMax;
             } else {
                 delete this.hoursChartInst.options.scales.y.max;
             }
@@ -502,7 +511,7 @@ const ChartsModule = {
                         y: {
                             grid: { color: '#1b2331' },
                             beginAtZero: true,
-                            max: isHourMode ? this.baseHourMax : undefined,
+                            max: isHourMode ? contextHourMax : undefined,
                             ticks: { font: { size: 9.5 } }
                         }
                     }
@@ -536,7 +545,7 @@ const ChartsModule = {
     /**
      * Gráfica de Barras: Día de la Semana (Lunes a Domingo)
      * - Si la animación por Días está activa o el usuario filtró días:
-     *   Mantiene su eje Y FIJO en el tope global y muestra los 7 días con el activo resaltado.
+     *   Mantiene su eje Y FIJO en el tope del municipio/filtro actual y muestra los 7 días con el activo resaltado.
      * - Si la animación por Horas/Meses está activa:
      *   Adapta su eje Y DINÁMICAMENTE para mostrar las barras con toda su altura y detalle.
      */
@@ -559,6 +568,8 @@ const ChartsModule = {
         const order = [1, 2, 3, 4, 5, 6, 0]; // Orden de despliegue: Lun a Dom
         const orderedLabels = order.map(i => wkLabels[i]);
         const orderedCounts = order.map(i => counts[i]);
+        const maxWk = Math.max(1, ...orderedCounts);
+        const contextWeekdayMax = Math.max(2, Math.ceil(maxWk * 1.15));
 
         const bgColors = order.map(wd => {
             if (isFiltered && !activeDays.has(wd)) return 'rgba(148, 163, 184, 0.22)';
@@ -569,9 +580,9 @@ const ChartsModule = {
             this.weekdaysChartInst.data.datasets[0].data = orderedCounts;
             this.weekdaysChartInst.data.datasets[0].backgroundColor = bgColors;
 
-            // Fijar eje Y si está en modo Días; adaptar dinámicamente en modo Horas/Meses
+            // Fijar eje Y al volumen del contexto activo si está en modo Días; adaptar dinámicamente en modo Horas/Meses
             if (isWeekdayMode) {
-                this.weekdaysChartInst.options.scales.y.max = this.baseWeekdayMax;
+                this.weekdaysChartInst.options.scales.y.max = contextWeekdayMax;
             } else {
                 delete this.weekdaysChartInst.options.scales.y.max;
             }
