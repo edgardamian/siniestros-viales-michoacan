@@ -13,7 +13,7 @@ const { execSync } = require('child_process');
 const ROOT_DIR = __dirname;
 const PROD_DIR = path.join(ROOT_DIR, 'produccion');
 
-console.log('🚀 Iniciando compilación y ofuscación para producción...\n');
+console.log('Iniciando compilación y ofuscación para producción...\n');
 
 // 1. Crear directorios de producción
 const dirs = [
@@ -42,9 +42,9 @@ dataFiles.forEach(file => {
     if (fs.existsSync(src)) {
         fs.copyFileSync(src, dest);
         const sizeMb = (fs.statSync(dest).size / (1024 * 1024)).toFixed(2);
-        console.log(`✅ Archivo de datos copiado: data/${file} (${sizeMb} MB)`);
+        console.log(`Archivo de datos copiado: data/${file} (${sizeMb} MB)`);
     } else {
-        console.warn(`⚠️ No se encontró: ${src}`);
+        console.warn(`No se encontró: ${src}`);
     }
 });
 
@@ -60,7 +60,7 @@ if (fs.existsSync(cssSource)) {
         .replace(/\s*([\{\}\:\;\,])\s*/g, '$1')
         .replace(/;}/g, '}');
     fs.writeFileSync(cssDest, cssContent, 'utf-8');
-    console.log('✅ Hoja de estilos minificada: css/style.css');
+    console.log('Hoja de estilos minificada: css/style.css');
 }
 
 // 4. Ofuscar cada archivo JavaScript
@@ -79,18 +79,18 @@ jsFiles.forEach(file => {
     const outputPath = path.join(PROD_DIR, 'js', file);
 
     if (!fs.existsSync(inputPath)) {
-        console.warn(`⚠️ Archivo no encontrado: ${inputPath}`);
+        console.warn(`Archivo no encontrado: ${inputPath}`);
         return;
     }
 
-    console.log(`🔒 Ofuscando módulo: js/${file}...`);
+    console.log(`Ofuscando módulo: js/${file}...`);
     const cmd = `npx.cmd javascript-obfuscator "${inputPath}" --output "${outputPath}" --compact true --control-flow-flattening true --control-flow-flattening-threshold 0.65 --string-array true --string-array-encoding base64 --string-array-threshold 0.75 --rename-globals false --target browser`;
 
     try {
         execSync(cmd, { cwd: ROOT_DIR, stdio: 'pipe' });
         console.log(`   └─ Listo: produccion/js/${file}`);
     } catch (err) {
-        console.error(`❌ Error al ofuscar ${file}:`, err.message);
+        console.error(`Error al ofuscar ${file}:`, err.message);
         // Fallback: copiar original si falla
         fs.copyFileSync(inputPath, outputPath);
     }
@@ -101,8 +101,8 @@ const htmlSource = path.join(ROOT_DIR, 'index.html');
 const htmlDest = path.join(PROD_DIR, 'index.html');
 if (fs.existsSync(htmlSource)) {
     fs.copyFileSync(htmlSource, htmlDest);
-    console.log('✅ Estructura HTML copiada: produccion/index.html');
+    console.log('Estructura HTML copiada: produccion/index.html');
 }
 
-console.log('\n🎉 ¡Compilación terminada con éxito!');
-console.log('📂 La versión de producción está lista en: /produccion');
+console.log('\n¡Compilación terminada con éxito!');
+console.log('La versión de producción está lista en: /produccion');
