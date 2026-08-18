@@ -654,6 +654,58 @@ main.layout {
   min-width: 0;
 }
 
+#map-panel {
+  order: 1;
+}
+
+#clock-panel {
+  order: 2;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#trend-panel {
+  order: 3;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Estado intercambiado: Tendencia sube al segundo lugar, Horas/Días baja al tercero */
+.map-col.swapped #trend-panel {
+  order: 2;
+}
+
+.map-col.swapped #clock-panel {
+  order: 3;
+}
+
+.btn-swap-panels {
+  background: var(--panel-2);
+  border: 1px solid var(--linea);
+  color: var(--niebla);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+  margin-left: auto;
+}
+
+.btn-swap-panels:hover {
+  background: var(--panel-3);
+  border-color: var(--cono-naranja);
+  color: var(--senial-amarillo);
+  transform: translateY(-1px);
+}
+
+.btn-swap-panels:active {
+  transform: scale(0.96);
+}
+
 .map-panel {
   padding: 0;
   overflow: hidden;
