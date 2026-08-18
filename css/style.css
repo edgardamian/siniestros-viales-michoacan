@@ -1277,7 +1277,7 @@ main.layout {
 }
 
 .scrollable-list {
-  max-height: 310px;
+  max-height: 440px;
   overflow-y: auto;
   padding-right: 4px;
 }
