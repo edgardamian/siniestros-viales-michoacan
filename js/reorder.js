@@ -9,6 +9,7 @@
 
 const ReorderModule = {
     init() {
+        this.initColumn('#sidebar', '.drag-item-filter', 'dash_sidebar_order');
         this.initColumn('#charts-col', '.drag-item', 'dash_right_order');
         this.initColumn('.map-col', '.drag-item-center', 'dash_center_order');
     },
@@ -99,6 +100,7 @@ const ReorderModule = {
      * Restablece el orden de todas las gráficas al orden inicial por defecto.
      */
     resetOrder() {
+        localStorage.removeItem('dash_sidebar_order');
         localStorage.removeItem('dash_right_order');
         localStorage.removeItem('dash_center_order');
         window.location.reload();

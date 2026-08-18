@@ -364,6 +364,16 @@ main.layout {
 .filter-block {
   border-bottom: 1px solid var(--linea);
   padding-bottom: 12px;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+  position: relative;
+}
+
+.filter-block.is-dragging {
+  opacity: 0.35;
+  outline: 2px dashed var(--cono-naranja) !important;
+  outline-offset: 4px;
+  box-shadow: 0 8px 24px rgba(255, 106, 0, 0.3);
+  cursor: grabbing;
 }
 
 .filter-block:last-child {
@@ -379,8 +389,10 @@ main.layout {
   font-weight: 600;
   margin-bottom: 8px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 6px;
+  user-select: none;
 }
 
 .filter-title .mini-link {

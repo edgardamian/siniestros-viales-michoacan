@@ -71,49 +71,73 @@
     <!-- ÁREA DE CONTENIDO EN 3 COLUMNAS -->
     <main class="layout">
 
-      <!-- COLUMNA IZQUIERDA: Panel Lateral de Filtros -->
+      <!-- COLUMNA IZQUIERDA: Panel Lateral de Filtros Reordenables -->
       <aside class="panel sidebar" id="sidebar">
-        <div class="filter-block">
-          <div class="filter-title">Severidad</div>
+        <div class="filter-block drag-item-filter" id="filter-severidad" data-drag-id="severidad">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Severidad</span>
+          </div>
           <div class="chips" id="severity-chips"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Tipo de vehículo <span class="mini-link" id="vehi-all">todos</span> / <span
-              class="mini-link" id="vehi-none">ninguno</span></div>
+        <div class="filter-block drag-item-filter" id="filter-vehiculo" data-drag-id="vehiculo">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Tipo de vehículo</span>
+            <span style="margin-left:auto; font-size:10px;"><span class="mini-link" id="vehi-all">todos</span> / <span class="mini-link" id="vehi-none">ninguno</span></span>
+          </div>
           <div class="checklist" id="vehi-checklist"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Municipio <span class="mini-link" id="muni-all">todos</span> / <span
-              class="mini-link" id="muni-none">ninguno</span></div>
+        <div class="filter-block drag-item-filter" id="filter-municipio" data-drag-id="municipio">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Municipio</span>
+            <span style="margin-left:auto; font-size:10px;"><span class="mini-link" id="muni-all">todos</span> / <span class="mini-link" id="muni-none">ninguno</span></span>
+          </div>
           <input class="search-input" id="muni-search" placeholder="Buscar municipio…">
           <div class="checklist" id="muni-checklist"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Tipo de incidente <span class="mini-link" id="tipo-all">todos</span> / <span
-              class="mini-link" id="tipo-none">ninguno</span></div>
+        <div class="filter-block drag-item-filter" id="filter-tipo" data-drag-id="tipo">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Tipo de incidente</span>
+            <span style="margin-left:auto; font-size:10px;"><span class="mini-link" id="tipo-all">todos</span> / <span class="mini-link" id="tipo-none">ninguno</span></span>
+          </div>
           <div class="checklist" id="tipo-checklist"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Condición climática</div>
+        <div class="filter-block drag-item-filter" id="filter-clima" data-drag-id="clima">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Condición climática</span>
+          </div>
           <div class="chips" id="clima-chips"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Condición de la vía</div>
+        <div class="filter-block drag-item-filter" id="filter-via" data-drag-id="via">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Condición de la vía</span>
+          </div>
           <div class="chips" id="via-chips"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Superficie</div>
+        <div class="filter-block drag-item-filter" id="filter-superficie" data-drag-id="superficie">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Superficie</span>
+          </div>
           <div class="chips" id="superf-chips"></div>
         </div>
 
-        <div class="filter-block">
-          <div class="filter-title">Sexo del presunto responsable</div>
+        <div class="filter-block drag-item-filter" id="filter-sexo" data-drag-id="sexo">
+          <div class="filter-title">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <span>Sexo del presunto responsable</span>
+          </div>
           <div class="chips" id="sexo-chips"></div>
         </div>
       </aside>
