@@ -701,12 +701,12 @@ const ChartsModule = {
             }
         }
 
-        // Generar encabezado de horas (00h a 23h)
+        // Generar encabezado de horas con todas las horas (00 a 23)
         let html = '<div class="matrix-grid-wrap">';
         html += '<div class="matrix-header-row"><div class="matrix-day-label-head"></div>';
         for (let h = 0; h < 24; h++) {
-            const hText = (h % 3 === 0 || h === 23) ? `${h}h` : '';
-            html += `<div class="matrix-hour-col-head">${hText}</div>`;
+            const hText = String(h).padStart(2, '0');
+            html += `<div class="matrix-hour-col-head" title="${hText}:00 h">${hText}</div>`;
         }
         html += '</div>';
 

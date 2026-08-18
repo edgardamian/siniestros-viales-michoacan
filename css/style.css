@@ -1345,58 +1345,60 @@ main.layout {
 /* ---------- MATRIZ DE RIESGO TEMPORAL (7 DÍAS × 24 HORAS) ---------- */
 .risk-matrix-container {
   width: 100%;
-  overflow-x: auto;
-  padding: 4px 0 2px;
+  box-sizing: border-box;
+  padding: 4px 2px 2px;
+  overflow: hidden;
 }
 
 .matrix-grid-wrap {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 480px;
+  gap: 2.5px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .matrix-header-row {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 9.5px;
-  color: var(--niebla-2);
-  font-family: 'IBM Plex Mono', monospace;
+  gap: 2.5px;
   margin-bottom: 2px;
 }
 
 .matrix-day-label-head {
-  width: 32px;
+  width: 28px;
   flex-shrink: 0;
 }
 
 .matrix-hour-col-head {
   flex: 1;
   text-align: center;
-  overflow: visible;
-  white-space: nowrap;
+  font-size: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--niebla-2);
+  line-height: 1;
+  user-select: none;
 }
 
 .matrix-row {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2.5px;
 }
 
 .matrix-day-label {
-  width: 32px;
-  font-size: 10px;
+  width: 28px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--niebla);
   flex-shrink: 0;
   text-align: right;
-  padding-right: 6px;
+  padding-right: 4px;
 }
 
 .matrix-cell {
   flex: 1;
-  height: 14px;
+  height: 13px;
   border-radius: 2px;
   cursor: pointer;
   transition: transform 0.12s ease, filter 0.12s ease;
@@ -1404,10 +1406,19 @@ main.layout {
 }
 
 .matrix-cell:hover {
-  transform: scale(1.35);
+  transform: scale(1.18);
   z-index: 10;
-  filter: brightness(1.3);
-  outline: 1px solid #fff;
+  filter: brightness(1.4);
+  outline: 1.5px solid #fff;
+  outline-offset: -1px;
+}
+
+.matrix-cell[data-hour="0"] {
+  transform-origin: center left;
+}
+
+.matrix-cell[data-hour="23"] {
+  transform-origin: center right;
 }
 
 .matrix-legend {
