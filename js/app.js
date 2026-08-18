@@ -41,26 +41,7 @@ window.App = {
                 ReorderModule.init();
             }
 
-            // 4. Configurar botón de intercambio de paneles (Horas/Días vs Tendencia)
-            const mapCol = document.querySelector('.map-col');
-            const swapBtns = document.querySelectorAll('.btn-swap-panels');
-            const isSwapped = localStorage.getItem('dash_panels_swapped') === 'true';
-
-            if (isSwapped && mapCol) {
-                mapCol.classList.add('swapped');
-            }
-
-            swapBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (!mapCol) return;
-                    mapCol.classList.toggle('swapped');
-                    const nowSwapped = mapCol.classList.contains('swapped');
-                    localStorage.setItem('dash_panels_swapped', nowSwapped);
-                });
-            });
-
-            // 5. Programar la primera actualización del tablero
+            // 4. Programar la primera actualización del tablero
             this.scheduleUpdate();
 
         } catch (error) {
