@@ -147,7 +147,7 @@ const DataModule = {
             });
 
             // 2. Cargar archivo accidentes_limpio.csv
-            Papa.parse("data/accidentes_limpio.csv", {
+            Papa.parse("data/accidentes_limpio_actualizado.csv", { //se modifico el nombre del archivo aqui
                 download: true,
                 header: true,
                 dynamicTyping: true,
