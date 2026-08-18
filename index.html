@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Accidentes Viales · Michoacán 2016–2026</title>
+  <title>Siniestros Viales · Michoacán 2016–2026</title>
 
   <!-- Hojas de estilo externas (Leaflet, MarkerCluster, MapLibre GL, fuentes y diseño custom) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -20,7 +20,7 @@
   <!-- PANTALLA DE CARGA (SPINNER) -->
   <div id="loading">
     <div class="spinner"></div>
-    <p id="loading-text">Cargando 55,052 accidentes...</p>
+    <p id="loading-text">Cargando 55,052 siniestros viales...</p>
   </div>
 
   <div class="app">
@@ -30,7 +30,7 @@
       <div class="top-row">
         <div class="header-brand">
           <p class="eyebrow">COEPRA Michoacán · Seguridad Vial Michoacán · IMPLAN Morelia</p>
-          <h1>Accidentes viales
+          <h1>Siniestros viales
             <small>
               <span class="sub-line">Tablero interactivo · 2016–2026 · <span id="hdr-count">–</span> registros con
                 georreferencia</span>
@@ -137,7 +137,8 @@
                 <div class="tp-btn-group">
                   <button type="button" class="tp-icon-btn" id="tp-prev-btn" title="Paso anterior">◀</button>
                   <button type="button" class="tp-icon-btn" id="tp-next-btn" title="Siguiente paso">▶</button>
-                  <button type="button" class="tp-icon-btn" id="tp-reset-btn" title="Restablecer todos los datos">↺</button>
+                  <button type="button" class="tp-icon-btn" id="tp-reset-btn"
+                    title="Restablecer todos los datos">↺</button>
                 </div>
                 <div class="tp-mode-group">
                   <button type="button" class="tp-mode-btn active" data-mode="hour">⏰ Horas</button>
@@ -220,9 +221,9 @@
                   <div class="opacity-popover" id="opacity-popover">
                     <div class="opacity-header">
                       <span>Opacidad</span>
-                      <b id="opacity-val-text">85%</b>
+                      <b id="opacity-val-text">65%</b>
                     </div>
-                    <input type="range" id="layer-opacity-slider" min="15" max="100" value="85" step="5">
+                    <input type="range" id="layer-opacity-slider" min="15" max="100" value="65" step="5">
                   </div>
                 </div>
                 <!-- Botón Pantalla Completa -->
@@ -232,8 +233,8 @@
                     <path
                       d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                   </svg>
-                  <svg id="fs-icon-compress" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                  <svg id="fs-icon-compress" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
                     style="pointer-events:none; display:none;">
                     <path
                       d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />

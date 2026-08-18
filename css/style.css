@@ -305,7 +305,7 @@ h1 small .sub-line.author {
 /* ---------- MAQUETACIÓN EN 3 COLUMNAS ---------- */
 main.layout {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr) 360px;
+  grid-template-columns: 270px minmax(0, 1fr) 385px;
   gap: 14px;
   padding: 14px 24px 24px;
   flex: 1;
@@ -777,7 +777,7 @@ main.layout {
 }
 
 #map {
-  height: 420px;
+  height: 500px;
   width: 100%;
   background: #0b0e14;
   position: relative;

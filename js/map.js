@@ -12,7 +12,7 @@ const MapModule = {
     is3D: false,
     showBuildings: false,
     isFullscreen: false,
-    layerOpacity: 0.85,
+    layerOpacity: 0.65,
     pitch: 0,
     bearing: 0,
     currentPopup: null,
