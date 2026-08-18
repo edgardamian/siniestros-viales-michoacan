@@ -262,11 +262,14 @@
         </div>
 
         <!-- Panel Doble: Accidentes por Hora y Día de la Semana -->
-        <div class="panel clock-panel" id="clock-panel">
+        <div class="panel clock-panel drag-item-center" id="clock-panel" data-drag-id="clock">
           <!-- Accidentes por Hora -->
           <div class="time-chart-box">
             <div class="time-chart-header">
-              <h2>Accidentes por hora <span class="tag" id="hour-range-tag">00 – 23 h</span></h2>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+                <h2>Accidentes por hora <span class="tag" id="hour-range-tag">00 – 23 h</span></h2>
+              </div>
               <span class="clock-note" id="peak-hour-note"></span>
               <button type="button" class="btn-swap-panels" title="Intercambiar posición (Subir/Bajar con Tendencia mensual)">⇅ Cambiar orden</button>
             </div>
@@ -306,10 +309,13 @@
         </div>
 
         <!-- Panel de Tendencia Mensual (Líneas 2016–2026) -->
-        <div class="panel trend-panel" id="trend-panel">
+        <div class="panel trend-panel drag-item-center" id="trend-panel" data-drag-id="trend">
           <div class="time-chart-header"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <h2>Tendencia mensual <span class="tag" id="trend-range-tag">2016–2026</span></h2>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+              <h2>Tendencia mensual <span class="tag" id="trend-range-tag">2016–2026</span></h2>
+            </div>
             <span class="clock-note" style="font-size:11px;" id="trend-note">Periodo: <b id="year-label"
                 style="color:var(--ambar);">2016 – 2026</b><span id="trend-reset-box"></span></span>
             <button type="button" class="btn-swap-panels" title="Intercambiar posición (Subir/Bajar con Horas y Días)">⇅ Cambiar orden</button>
@@ -330,22 +336,34 @@
 
       </div>
 
-      <!-- COLUMNA DERECHA: Gráficos complementarios y Top Colonias -->
-      <div class="panel charts-col">
-        <div>
-          <h2>Tipo de vehículo</h2>
+      <!-- COLUMNA DERECHA: Gráficos complementarios y Top Colonias Reordenables -->
+      <div class="panel charts-col" id="charts-col">
+        <div class="drag-item" id="drag-vehiculos" data-drag-id="vehiculos">
+          <div class="drag-header">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <h2>Tipo de vehículo</h2>
+          </div>
           <div class="chart-box tall"><canvas id="chart-vehiculos"></canvas></div>
         </div>
-        <div>
-          <h2>Severidad</h2>
+        <div class="drag-item" id="drag-severidad" data-drag-id="severidad">
+          <div class="drag-header">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <h2>Severidad</h2>
+          </div>
           <div class="chart-box"><canvas id="chart-severidad"></canvas></div>
         </div>
-        <div>
-          <h2>Top tipos de incidente</h2>
+        <div class="drag-item" id="drag-tipos" data-drag-id="tipos">
+          <div class="drag-header">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <h2>Top tipos de incidente</h2>
+          </div>
           <div class="chart-box tall"><canvas id="chart-tipos"></canvas></div>
         </div>
-        <div>
-          <h2>Top colonias</h2>
+        <div class="drag-item" id="drag-colonias" data-drag-id="colonias">
+          <div class="drag-header">
+            <span class="drag-handle" title="Arrastrar para reordenar">⋮⋮</span>
+            <h2>Top colonias</h2>
+          </div>
           <div class="top-list scrollable-list" id="top-colonias"></div>
         </div>
       </div>
@@ -376,6 +394,7 @@
   <script src="js/charts.js?v=9.8"></script>
   <script src="js/filters.js?v=9.8"></script>
   <script src="js/player.js?v=9.8"></script>
+  <script src="js/reorder.js?v=9.8"></script>
   <script src="js/app.js?v=9.8"></script>
 
 </body>

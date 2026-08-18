@@ -1260,6 +1260,56 @@ main.layout {
   min-width: 0;
 }
 
+/* ---------- SISTEMA DE ARRASTRAR Y SOLTAR (DRAG & DROP) ---------- */
+.drag-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  user-select: none;
+}
+
+.drag-header h2 {
+  margin: 0 !important;
+  flex: 1;
+}
+
+.drag-handle {
+  color: var(--niebla-2);
+  font-size: 14px;
+  cursor: grab;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: all 0.15s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.65;
+}
+
+.drag-handle:hover {
+  color: var(--cono-naranja);
+  background: var(--panel-2);
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.drag-item {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+  position: relative;
+}
+
+.drag-item.is-dragging,
+.drag-item-center.is-dragging {
+  opacity: 0.35;
+  outline: 2px dashed var(--cono-naranja) !important;
+  outline-offset: -2px;
+  box-shadow: 0 8px 24px rgba(255, 106, 0, 0.3);
+  cursor: grabbing;
+}
+
 .chart-box {
   position: relative;
   height: 190px;

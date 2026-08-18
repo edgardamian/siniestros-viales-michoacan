@@ -31,11 +31,14 @@ window.App = {
             const loadingEl = document.getElementById('loading');
             if (loadingEl) loadingEl.style.display = 'none';
 
-            // 3. Inicializar módulos de gráficos, filtros y reproductor temporal
+            // 3. Inicializar módulos de gráficos, filtros, reproductor temporal y reordenamiento
             ChartsModule.init();
             FiltersModule.init();
             if (typeof PlayerModule !== 'undefined') {
                 PlayerModule.init();
+            }
+            if (typeof ReorderModule !== 'undefined') {
+                ReorderModule.init();
             }
 
             // 4. Configurar botón de intercambio de paneles (Horas/Días vs Tendencia)
