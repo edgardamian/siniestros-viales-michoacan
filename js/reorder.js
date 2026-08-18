@@ -22,18 +22,31 @@ const ReorderModule = {
         if (!container) return;
 
         // 1. Restaurar orden personalizado previamente guardado
+        const allAvailableEls = Array.from(container.querySelectorAll(itemSelector));
+        const allAvailableIds = allAvailableEls.map(el => el.getAttribute('data-drag-id')).filter(Boolean);
+
         const savedOrder = localStorage.getItem(storageKey);
+        let idsToApply = allAvailableIds;
+
         if (savedOrder) {
             try {
-                const ids = JSON.parse(savedOrder);
-                ids.forEach(id => {
-                    const el = container.querySelector(`[data-drag-id="${id}"]`);
-                    if (el) container.appendChild(el);
+                let savedIds = JSON.parse(savedOrder);
+                // Si faltan elementos nuevos en savedIds (como 'matrix'), agregarlos al final
+                allAvailableIds.forEach(id => {
+                    if (!savedIds.includes(id)) savedIds.push(id);
                 });
+                // Filtrar IDs que ya no existan
+                idsToApply = savedIds.filter(id => allAvailableIds.includes(id));
             } catch (e) {
                 console.warn("Error al restaurar orden de gráficas:", e);
             }
         }
+
+        // Aplicar el orden en el DOM asegurando que los paneles queden ordenados
+        idsToApply.forEach(id => {
+            const el = container.querySelector(`[data-drag-id="${id}"]`);
+            if (el) container.appendChild(el);
+        });
 
         // 2. Configurar eventos de Drag & Drop
         const items = container.querySelectorAll(itemSelector);
