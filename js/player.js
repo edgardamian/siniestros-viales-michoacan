@@ -228,12 +228,12 @@ const PlayerModule = {
 
         let text = '';
         if (this.mode === 'hour') {
-            text = `⏰ ${String(this.currentIndex).padStart(2, '0')}:00 h`;
+            text = `${String(this.currentIndex).padStart(2, '0')}:00 h`;
         } else if (this.mode === 'weekday') {
             const dayId = this.weekdayOrder[this.currentIndex];
-            text = `📅 ${this.weekdayNames[dayId] || ''}`;
+            text = `${this.weekdayNames[dayId] || ''}`;
         } else if (this.mode === 'month') {
-            text = this.monthList[this.currentIndex] ? `📈 ${this.monthList[this.currentIndex].label}` : '';
+            text = this.monthList[this.currentIndex] ? `${this.monthList[this.currentIndex].label}` : '';
         }
 
         if (label) label.textContent = text;

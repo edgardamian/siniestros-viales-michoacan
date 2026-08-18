@@ -141,15 +141,15 @@
                     title="Restablecer todos los datos">↺</button>
                 </div>
                 <div class="tp-mode-group">
-                  <button type="button" class="tp-mode-btn active" data-mode="hour">⏰ Horas</button>
-                  <button type="button" class="tp-mode-btn" data-mode="weekday">📅 Días</button>
-                  <button type="button" class="tp-mode-btn" data-mode="month">📈 Meses</button>
+                  <button type="button" class="tp-mode-btn active" data-mode="hour">Horas</button>
+                  <button type="button" class="tp-mode-btn" data-mode="weekday">Días</button>
+                  <button type="button" class="tp-mode-btn" data-mode="month">Meses</button>
                 </div>
               </div>
 
               <div class="tp-center">
                 <div class="tp-status-row">
-                  <span class="tp-current-label" id="tp-current-label">⏰ 00:00 h</span>
+                  <span class="tp-current-label" id="tp-current-label">00:00 h</span>
                   <span class="tp-count-badge" id="tp-count-badge">55,052 acc.</span>
                 </div>
                 <input type="range" class="tp-scrubber" id="tp-scrubber" min="0" max="23" value="0" step="1">
@@ -203,10 +203,15 @@
               <div class="tool-group">
                 <button class="tool-btn" id="tool-3d" title="Alternar Vista 3D (Inclinación)">3D</button>
                 <button class="tool-btn" id="tool-buildings" title="Activar / Ocultar Edificios 3D">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
-                    <path d="M3 10.5L12 3l9 7.5V21a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 21V10.5z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
+                    <rect x="4" y="3" width="7" height="18" rx="1" />
+                    <rect x="13" y="8" width="7" height="13" rx="1" />
+                    <line x1="7.5" y1="7" x2="7.51" y2="7" />
+                    <line x1="7.5" y1="11" x2="7.51" y2="11" />
+                    <line x1="7.5" y1="15" x2="7.51" y2="15" />
+                    <line x1="16.5" y1="12" x2="16.51" y2="12" />
+                    <line x1="16.5" y1="16" x2="16.51" y2="16" />
                   </svg>
                 </button>
                 <!-- Control de Opacidad / Transparencia -->
